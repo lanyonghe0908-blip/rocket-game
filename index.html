@@ -194,6 +194,21 @@ function draw(){
     const rocketY=Math.max(5,Math.min(H-5,ry));
     const scale=1.0-progress*.2; // keep plane visible
 
+    // ── HELIPAD (landing pad at start position) ──
+    const padX=W*.78,padY=H*.82;
+    gx.strokeStyle='rgba(255,255,255,.1)';gx.lineWidth=2;
+    gx.beginPath();gx.arc(padX,padY,32,0,Math.PI*2);gx.stroke();
+    gx.strokeStyle='rgba(255,255,255,.06)';gx.lineWidth=1;
+    gx.beginPath();gx.arc(padX,padY,38,0,Math.PI*2);gx.stroke();
+    // H letter
+    gx.fillStyle='rgba(255,255,255,.15)';gx.font='bold 22px sans-serif';gx.textAlign='center';gx.textBaseline='middle';
+    gx.fillText('H',padX,padY);
+    // Dashed cross
+    gx.strokeStyle='rgba(255,255,255,.06)';gx.setLineDash([4,8]);gx.lineWidth=1;
+    gx.beginPath();gx.moveTo(padX-24,padY-24);gx.lineTo(padX+24,padY+24);gx.stroke();
+    gx.beginPath();gx.moveTo(padX+24,padY-24);gx.lineTo(padX-24,padY+24);gx.stroke();
+    gx.setLineDash([]);
+
     // ── RUNWAY (during takeoff phase) ──
     if(progress<.2){
       const rwy=H*.88,rwx=W*.72,rww=W*.28;
