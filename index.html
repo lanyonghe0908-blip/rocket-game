@@ -157,28 +157,22 @@ function draw(){
   if(phase!=='wait'||pT<=0)gx.fillText(dm.toFixed(2)+'×',cx,multY);
   gx.shadowBlur=0;
 
-  // Rocket: bottom-right → top-left, WAVE PATH, zoom-out
+  // Rocket: bottom-right → top-left, WAVE PATH, 45° nose, slow
   if(phase==='fly'||phase==='end'){
-    const progress=Math.min(1,(dm-1)/8); // 0→1 over 1x→9x
+    const progress=Math.min(1,(dm-1)/14); // SLOWER: 1x→15x range
     const sx=W*.78,sy=H*.82;              // START: bottom-right
     const ex=W*.18,ey=H*.08;              // END: top-left
-    // Wave along the diagonal
-    const waveFreq=3.5; // wave frequency
-    const waveAmp=W*.08; // wave amplitude
+    const waveFreq=3.5,waveAmp=W*.08;
     const t=progress;
-    // Linear interpolation + sine wave perpendicular to path
     const dx=ex-sx,dy=ey-sy;
     const dist=Math.sqrt(dx*dx+dy*dy);
-    const nx=-dy/dist,ny=dx/dist; // perpendicular normal
-    const wave=Math.sin(t*Math.PI*waveFreq)*waveAmp*(1-t); // wave dampens at end
+    const nx=-dy/dist,ny=dx/dist;
+    const wave=Math.sin(t*Math.PI*waveFreq)*waveAmp*(1-t);
     const rx=sx+dx*t+nx*wave;
     const ry=sy+dy*t+ny*wave;
     const rocketX=Math.max(15,Math.min(W-15,rx));
     const rocketY=Math.max(5,Math.min(H-5,ry));
-    // Angle: tangent of path + wave derivative
-    const waveDeriv=Math.cos(t*Math.PI*waveFreq)*waveAmp*Math.PI*waveFreq*(1-t)-Math.sin(t*Math.PI*waveFreq)*waveAmp;
-    const tdx=dx+nx*waveDeriv,tdy=dy+ny*waveDeriv;
-    const angle=Math.atan2(-tdy,tdx)+.25;
+    const angle=Math.PI/4; // FIXED 45° nose-up-right
     const scale=1.0-progress*.65;
 
     // ── WAVE TRAIL ──
