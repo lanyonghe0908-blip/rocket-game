@@ -162,7 +162,7 @@ function draw(){
   }
   gx.shadowBlur=0;
 
-  // Rocket: ONLY during flight. Explosion handled separately.
+  // Rocket flight (phase==='fly' only)
   if(phase==='fly'){
     const progress=Math.min(1,(dm-1)/14); // SLOWER: 1x→15x range
     const sx=W*.78,sy=H*.82;              // START: bottom-right
@@ -192,64 +192,50 @@ function draw(){
       }
     }
 
-    // ── ROCKET (only during flight, hidden on explosion) ──
-    if(showRocket){
+    // ── AIRPLANE ──
     gx.save();gx.translate(rocketX,rocketY);gx.scale(scale,scale);gx.rotate(-angle);
 
-    // TRAIL smoke behind
-    for(let i=0;i<6;i++){
-      gx.fillStyle=`rgba(100,120,150,${.04-i*.005})`;
-      gx.beginPath();gx.arc((Math.random()-.5)*8,12+i*5,3+i,0,Math.PI*2);gx.fill();
+    // Jet exhaust trail
+    for(let i=0;i<8;i++){
+      gx.fillStyle=`rgba(180,200,220,${.06-i*.006})`;
+      gx.beginPath();gx.arc((Math.random()-.5)*10,14+i*6,3+i*.5,0,Math.PI*2);gx.fill();
     }
 
-    // FLAME
+    // Jet flame
     gx.fillStyle='#f97316';
-    gx.beginPath();gx.moveTo(-11,13);gx.quadraticCurveTo(-4,30+Math.random()*7,0,40+Math.random()*12);gx.quadraticCurveTo(4,30+Math.random()*7,11,13);gx.fill();
+    gx.beginPath();gx.moveTo(-6,14);gx.quadraticCurveTo(-3,26+Math.random()*6,0,34+Math.random()*10);gx.quadraticCurveTo(3,26+Math.random()*6,6,14);gx.fill();
     gx.fillStyle='#fbbf24';
-    gx.beginPath();gx.moveTo(-7,11);gx.quadraticCurveTo(-2,22+Math.random()*5,0,30+Math.random()*8);gx.quadraticCurveTo(2,22+Math.random()*5,7,11);gx.fill();
+    gx.beginPath();gx.moveTo(-4,12);gx.quadraticCurveTo(-2,20+Math.random()*4,0,26+Math.random()*6);gx.quadraticCurveTo(2,20+Math.random()*4,4,12);gx.fill();
     gx.fillStyle='#fef3c7';
-    gx.beginPath();gx.moveTo(-4,9);gx.quadraticCurveTo(-1,16+Math.random()*3,0,22+Math.random()*5);gx.quadraticCurveTo(1,16+Math.random()*3,4,9);gx.fill();
-    for(let i=0;i<4;i++){gx.fillStyle=`rgba(251,191,36,${.3+Math.random()*.3})`;gx.beginPath();gx.arc((Math.random()-.5)*6,20+Math.random()*18,1+Math.random()*2,0,Math.PI*2);gx.fill()}
+    gx.beginPath();gx.moveTo(-3,10);gx.quadraticCurveTo(-1,15+Math.random()*3,0,18+Math.random()*4);gx.quadraticCurveTo(1,15+Math.random()*3,3,10);gx.fill();
 
-    // Body
-    const gd=gx.createLinearGradient(0,-20,0,13);gd.addColorStop(0,'#fff');gd.addColorStop(.4,'#e2e8f0');gd.addColorStop(1,'#64748b');
-    gx.fillStyle=gd;gx.beginPath();gx.moveTo(0,-20);gx.quadraticCurveTo(10,-3,10,9);gx.lineTo(-10,9);gx.quadraticCurveTo(-10,-3,0,-20);gx.fill();
-    gx.fillStyle='#ff3d4f';gx.beginPath();gx.moveTo(-10,2);gx.lineTo(-15,11);gx.lineTo(-7,6);gx.fill();gx.beginPath();gx.moveTo(10,2);gx.lineTo(15,11);gx.lineTo(7,6);gx.fill();
-    gx.fillStyle='#ff3d4f';gx.beginPath();gx.moveTo(0,-28);gx.quadraticCurveTo(4,-12,7,-20);gx.quadraticCurveTo(-7,-20,-4,-12);gx.fill();
-    gx.fillStyle='#60a5fa';gx.beginPath();gx.arc(0,-7,5,0,Math.PI*2);gx.fill();
-    gx.fillStyle='rgba(255,255,255,.3)';gx.beginPath();gx.arc(-2,-9,1.5,0,Math.PI*2);gx.fill();
+    // Fuselage (body)
+    const fg=gx.createLinearGradient(0,-18,0,10);
+    fg.addColorStop(0,'#fff');fg.addColorStop(.4,'#e8ecf2');fg.addColorStop(1,'#94a3b8');
+    gx.fillStyle=fg;
+    gx.beginPath();gx.ellipse(0,-2,6,20,0,0,Math.PI*2);gx.fill();
+    // Nose
+    gx.fillStyle='#ff3d4f';
+    gx.beginPath();gx.moveTo(0,-24);gx.quadraticCurveTo(5,-14,6,-20);gx.quadraticCurveTo(-6,-20,-5,-14);gx.fill();
+
+    // Wings
+    gx.fillStyle='#94a3b8';
+    gx.beginPath();gx.moveTo(-3,-5);gx.lineTo(-18,-2);gx.lineTo(-18,4);gx.lineTo(-3,2);gx.fill();
+    gx.beginPath();gx.moveTo(3,-5);gx.lineTo(18,-2);gx.lineTo(18,4);gx.lineTo(3,2);gx.fill();
+    // Wing tips red
+    gx.fillStyle='#ff3d4f';
+    gx.fillRect(-18,-2,3,6);gx.fillRect(15,-2,3,6);
+
+    // Tail fin
+    gx.fillStyle='#ff3d4f';
+    gx.beginPath();gx.moveTo(-3,10);gx.lineTo(-8,18);gx.lineTo(0,14);gx.fill();
+    gx.beginPath();gx.moveTo(3,10);gx.lineTo(8,18);gx.lineTo(0,14);gx.fill();
+
+    // Windows
+    gx.fillStyle='#60a5fa';
+    [{y:-10},{y:-5},{y:0}].forEach(w=>{gx.beginPath();gx.arc(0,w.y,2,0,Math.PI*2);gx.fill()});
 
     gx.restore();
-    }
-
-    // ── EXPLOSION (at rocket position, BIG) ──
-    if(phase==='end'){
-      const ex=rocketX,ey=rocketY;
-      // Screen flash
-      const flash=gx.createRadialGradient(ex,ey,0,ex,ey,W);
-      flash.addColorStop(0,'rgba(255,61,79,.12)');flash.addColorStop(.3,'rgba(255,100,30,.04)');flash.addColorStop(1,'rgba(0,0,0,0)');
-      gx.fillStyle=flash;gx.fillRect(0,0,W,H);
-      // Outer shockwave rings
-      [18,28,42,60].forEach((r,i)=>{
-        gx.strokeStyle=`rgba(255,${80-i*20},${30+i*5},${.4-i*.08})`;gx.lineWidth=4-i*.8;
-        gx.beginPath();gx.arc(ex,ey,r,0,Math.PI*2);gx.stroke();
-      });
-      // Debris
-      for(let i=0;i<40;i++){const a=Math.random()*Math.PI*2,d=10+Math.random()*50;gx.fillStyle=`rgba(${255-Math.random()*120},${Math.random()*100},${Math.random()*40},${.2+Math.random()*.3})`;gx.beginPath();gx.arc(ex+Math.cos(a)*d,ey+Math.sin(a)*d,1+Math.random()*5,0,Math.PI*2);gx.fill()}
-      // Core fireball
-      const fb=gx.createRadialGradient(ex,ey,0,ex,ey,32);
-      fb.addColorStop(0,'rgba(255,240,200,.7)');fb.addColorStop(.15,'rgba(255,180,30,.5)');fb.addColorStop(.4,'rgba(255,60,10,.25)');fb.addColorStop(.7,'rgba(180,0,0,.08)');fb.addColorStop(1,'rgba(0,0,0,0)');
-      gx.fillStyle=fb;gx.beginPath();gx.arc(ex,ey,32,0,Math.PI*2);gx.fill();
-      // Second pulse
-      const fb2=gx.createRadialGradient(ex,ey,0,ex,ey,20);
-      fb2.addColorStop(0,'rgba(255,255,255,.6)');fb2.addColorStop(.3,'rgba(255,200,50,.3)');fb2.addColorStop(1,'rgba(255,0,0,0)');
-      gx.fillStyle=fb2;gx.beginPath();gx.arc(ex,ey,20,0,Math.PI*2);gx.fill();
-      // CRASH multiplier AT explosion point
-      gx.fillStyle='#ff3d4f';gx.font='bold 28px sans-serif';gx.textAlign='center';
-      gx.shadowColor='rgba(255,0,0,.5)';gx.shadowBlur=15;
-      gx.fillText('💥 '+cp.toFixed(2)+'×',ex,ey-40);
-      gx.shadowBlur=0;
-    }
   }
 
   // ── EXPLOSION (phase==='end', completely separate from rocket) ──
