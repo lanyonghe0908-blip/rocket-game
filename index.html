@@ -165,31 +165,17 @@ function draw(){
   // Airplane flight (phase==='fly' only)
   if(phase==='fly'){
     const progress=Math.min(1,(dm-1)/22); // SLOWER: 1x→23x range
-    // Takeoff runway → wave flight → top-left
-    const runwayX=W*.85,runwayY=H*.88;     // RUNWAY takeoff point
-    const sx=W*.78,sy=H*.82;              // transition to wave
-    const ex=W*.18,ey=H*.08;              // END: top-left
-    // Phase 1: takeoff (0-15%), Phase 2: wave flight (15-100%)
-    const takeoffProgress=Math.min(1,progress/.15);
     const waveFreq=3.5,waveAmp=W*.08;
-    let rx,ry,angle;
-    if(progress<.15){
-      // TAKEOFF: straight runway acceleration
-      const tp=takeoffProgress;
-      rx=runwayX-(runwayX-sx)*tp; // move from runway to wave start
-      ry=runwayY-(runwayY-sy)*tp;
-      angle=Math.PI/3; // steep climb
-    } else {
-      // WAVE FLIGHT
-      const t=(progress-.15)/.85; // remap to 0-1
-      const dx=ex-sx,dy=ey-sy;
-      const dist=Math.sqrt(dx*dx+dy*dy);
-      const nx=-dy/dist,ny=dx/dist;
-      const wave=Math.sin(t*Math.PI*waveFreq)*waveAmp*(1-t);
-      rx=sx+dx*t+nx*wave;
-      ry=sy+dy*t+ny*wave;
-      angle=Math.PI/4; // 45° cruise
-    }
+    const sx=W*.78,sy=H*.82; // start from helipad
+    const ex=W*.18,ey=H*.08; // end top-left
+    const t=progress;
+    const dx=ex-sx,dy=ey-sy;
+    const dist=Math.sqrt(dx*dx+dy*dy);
+    const nx=-dy/dist,ny=dx/dist;
+    const wave=Math.sin(t*Math.PI*waveFreq)*waveAmp*(1-t);
+    const rx=sx+dx*t+nx*wave;
+    const ry=sy+dy*t+ny*wave;
+    const angle=Math.PI/4;
     const rocketX=Math.max(15,Math.min(W-15,rx));
     const rocketY=Math.max(5,Math.min(H-5,ry));
     const scale=1.0-progress*.2; // keep plane visible
@@ -208,14 +194,6 @@ function draw(){
     gx.beginPath();gx.moveTo(padX-24,padY-24);gx.lineTo(padX+24,padY+24);gx.stroke();
     gx.beginPath();gx.moveTo(padX+24,padY-24);gx.lineTo(padX-24,padY+24);gx.stroke();
     gx.setLineDash([]);
-
-    // ── RUNWAY (during takeoff phase) ──
-    if(progress<.2){
-      const rwy=H*.88,rwx=W*.72,rww=W*.28;
-      gx.fillStyle='rgba(100,110,120,.15)';gx.fillRect(rwx,rwy-2,rww,4);
-      gx.strokeStyle='rgba(255,255,255,.08)';gx.setLineDash([8,12]);
-      gx.beginPath();gx.moveTo(rwx,rwy);gx.lineTo(rwx+rww,rwy);gx.stroke();gx.setLineDash([]);
-    }
 
     // ── WAVE TRAIL ──
     if(phase==='fly'){
