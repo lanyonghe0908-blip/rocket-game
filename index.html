@@ -213,7 +213,7 @@ function draw(){
     }
 
     // ── AIRPLANE (with banking, speed lines, dynamic flame) ──
-    const bankAngle=Math.sin(t*2.5)*.25; // gentle banking
+    const bankAngle=(goLeft?-1:1)*Math.abs(Math.sin(t*3)*.35); // bank with direction
     const flameSize=1+progress*2; // flame grows as speed increases
     gx.save();gx.translate(rocketX,rocketY);gx.scale(scale,scale);gx.rotate(-angle+bankAngle);
 
