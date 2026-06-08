@@ -177,7 +177,7 @@ function draw(){
     const rocketX=Math.max(15,Math.min(W-15,rx));
     const rocketY=Math.max(5,Math.min(H-5,ry));
     const angle=Math.PI/4; // FIXED 45° nose-up-right
-    const scale=1.0-progress*.65;
+    const scale=1.0-progress*.3; // keep plane visible, min 0.7x
 
     // ── WAVE TRAIL ──
     if(phase==='fly'){
