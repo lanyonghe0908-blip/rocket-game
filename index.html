@@ -157,36 +157,39 @@ function draw(){
   if(phase!=='wait'||pT<=0)gx.fillText(dm.toFixed(2)+'×',cx,multY);
   gx.shadowBlur=0;
 
-  // Rocket: bottom-right → top-left, curved arc, zoom-out effect
+  // Rocket: bottom-right → top-left, WAVE PATH, zoom-out
   if(phase==='fly'||phase==='end'){
     const progress=Math.min(1,(dm-1)/8); // 0→1 over 1x→9x
-    // Bezier curve: start BR corner, arc through center, end TL corner
     const sx=W*.78,sy=H*.82;              // START: bottom-right
     const ex=W*.18,ey=H*.08;              // END: top-left
-    // Control point (arcs the path upward)
-    const cpx=W*.5,cpy=H*.1-progress*H*.6;
-    // Quadratic bezier interpolation
+    // Wave along the diagonal
+    const waveFreq=3.5; // wave frequency
+    const waveAmp=W*.08; // wave amplitude
     const t=progress;
-    const rx=(1-t)*(1-t)*sx+2*(1-t)*t*cpx+t*t*ex;
-    const ry=(1-t)*(1-t)*sy+2*(1-t)*t*cpy+t*t*ey;
+    // Linear interpolation + sine wave perpendicular to path
+    const dx=ex-sx,dy=ey-sy;
+    const dist=Math.sqrt(dx*dx+dy*dy);
+    const nx=-dy/dist,ny=dx/dist; // perpendicular normal
+    const wave=Math.sin(t*Math.PI*waveFreq)*waveAmp*(1-t); // wave dampens at end
+    const rx=sx+dx*t+nx*wave;
+    const ry=sy+dy*t+ny*wave;
     const rocketX=Math.max(15,Math.min(W-15,rx));
     const rocketY=Math.max(5,Math.min(H-5,ry));
-    // Angle follows the curve tangent
-    const tx=2*(1-t)*(cpx-sx)+2*t*(ex-cpx);
-    const ty=2*(1-t)*(cpy-sy)+2*t*(ey-cpy);
-    const angle=Math.atan2(-ty,tx)+.3;
-    // Scale: starts big, shrinks as it "flies away" (zoom out)
-    const scale=1.0-progress*.65; // 1.0 → 0.35
+    // Angle: tangent of path + wave derivative
+    const waveDeriv=Math.cos(t*Math.PI*waveFreq)*waveAmp*Math.PI*waveFreq*(1-t)-Math.sin(t*Math.PI*waveFreq)*waveAmp;
+    const tdx=dx+nx*waveDeriv,tdy=dy+ny*waveDeriv;
+    const angle=Math.atan2(-tdy,tdx)+.25;
+    const scale=1.0-progress*.65;
 
-    // ── CURVED TRAIL ──
+    // ── WAVE TRAIL ──
     if(phase==='fly'){
-      for(let i=0;i<20;i++){
-        const pt=(i/20)*progress;
-        const ptt=Math.max(0,Math.min(1,pt));
-        const px=(1-ptt)*(1-ptt)*sx+2*(1-ptt)*ptt*cpx+ptt*ptt*ex;
-        const py=(1-ptt)*(1-ptt)*sy+2*(1-ptt)*ptt*cpy+ptt*ptt*ey;
-        gx.fillStyle=`rgba(0,229,255,${.08-i*.0035})`;
-        gx.beginPath();gx.arc(px+(Math.random()-.5)*4,py+(Math.random()-.5)*4,2.5-i*.1,0,Math.PI*2);gx.fill();
+      for(let i=0;i<30;i++){
+        const pt=i/30;
+        if(pt>progress)continue;
+        const pw=Math.sin(pt*Math.PI*waveFreq)*waveAmp*(1-pt);
+        const ppx=sx+dx*pt+nx*pw,ppy=sy+dy*pt+ny*pw;
+        gx.fillStyle=`rgba(0,229,255,${.07-pt*.06})`;
+        gx.beginPath();gx.arc(ppx+(Math.random()-.5)*3,ppy+(Math.random()-.5)*3,2-pt*1.5,0,Math.PI*2);gx.fill();
       }
     }
 
