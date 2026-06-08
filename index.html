@@ -100,6 +100,7 @@ canvas{display:block;width:100%;height:100%}
 <div class="bp">
   <div class="br"><span class="id">A</span><div class="ch" id="q1"><b class="on" data-v="1">1</b><b data-v="5">5</b><b data-v="10">10</b></div><input class="amt" id="in1" value="1" type="number" inputmode="numeric"><span class="dot">×</span><input class="tp" id="ac1" placeholder="AUTO" type="number" inputmode="decimal"><button class="bet" id="bt1">BET</button><button class="out" id="co1">EXIT</button><button class="res" id="re1">--</button></div>
   <div class="br"><span class="id">B</span><div class="ch" id="q2"><b data-v="1">1</b><b class="on" data-v="5">5</b><b data-v="10">10</b></div><input class="amt" id="in2" value="5" type="number" inputmode="numeric"><span class="dot">×</span><input class="tp" id="ac2" placeholder="AUTO" type="number" inputmode="decimal"><button class="bet" id="bt2">BET</button><button class="out" id="co2">EXIT</button><button class="res" id="re2">--</button></div>
+  <div class="br"><span class="id">C</span><div class="ch" id="q3"><b data-v="1">1</b><b class="on" data-v="5">5</b><b data-v="10">10</b></div><input class="amt" id="in3" value="10" type="number" inputmode="numeric"><span class="dot">×</span><input class="tp" id="ac3" placeholder="AUTO" type="number" inputmode="decimal"><button class="bet" id="bt3">BET</button><button class="out" id="co3">EXIT</button><button class="res" id="re3">--</button></div>
 </div>
 
 <!-- NAV -->
@@ -132,7 +133,7 @@ const RK=[{n:'CRYPTOKING',g:8520000},{n:'MINEMASTER',g:6230000},{n:'GOLDRUSH',g:
 const gw=document.getElementById('gameWrap'),gc=document.getElementById('gcC'),gx=gc.getContext('2d');
 let W=800,H=520;function rs(){const r=gw.getBoundingClientRect();if(r.width<10)return;W=gc.width=r.width*2;H=gc.height=r.height*2}rs();if(W<20)setTimeout(()=>{rs();draw();stC()},300);window.addEventListener('resize',()=>{rs();draw()});
 
-const hist=[];let pts=[],phase='wait',pT=3,mult=1,cp=0,bets=[null,null],boost=1,boostT=0,autoC=[0,0],inv=0,scd=0;
+const hist=[];let pts=[],phase='wait',pT=3,mult=1,cp=0,bets=[null,null,null],boost=1,boostT=0,autoC=[0,0,0],inv=0,scd=0;
 
 function gCP(){const r=Math.random();if(r<.015)return 1;if(r<.38)return 1.1+Math.random()*1.5;if(r<.68)return 2.5+Math.random()*3;if(r<.86)return 5+Math.random()*8;if(r<.96)return 10+Math.random()*25;return 30+Math.random()*120}
 
@@ -148,19 +149,17 @@ function draw(){
   const dm=phase==='fly'?mult:(phase==='end'?cp:1);
   // Countdown
   if(phase==='wait'&&pT>0){const sec=Math.ceil(pT);gx.strokeStyle='rgba(0,229,255,.15)';gx.lineWidth=3;gx.beginPath();gx.arc(cx,H*.42,44,0,Math.PI*2);gx.stroke();gx.shadowColor='rgba(0,229,255,.2)';gx.shadowBlur=12;gx.fillStyle='#fff';gx.font='bold 52px sans-serif';gx.textAlign='center';gx.fillText(sec,cx,H*.42+16);gx.shadowBlur=0}
-  // Multiplier
+  // Multiplier (only during flight)
   const multY=H*.48;
-  if(phase==='fly'){gx.shadowColor='rgba(0,230,118,.4)';gx.shadowBlur=30}
-  else if(phase==='end'){gx.shadowColor='rgba(255,61,79,.4)';gx.shadowBlur=30}
-  // Only show center multiplier during flight, NOT during explosion
   if(phase==='fly'){
+    gx.shadowColor='rgba(0,230,118,.4)';gx.shadowBlur=30;
     gx.fillStyle='#00e676';gx.font='bold 80px sans-serif';gx.textAlign='center';
     gx.fillText(dm.toFixed(2)+'×',cx,multY);
+    gx.shadowBlur=0;
   } else if(phase==='wait'&&pT<=0){
     gx.fillStyle='rgba(255,255,255,.06)';gx.font='bold 52px sans-serif';gx.textAlign='center';
     gx.fillText('1.00×',cx,multY);
   }
-  gx.shadowBlur=0;
 
   // Rocket flight (phase==='fly' only)
   if(phase==='fly'){
@@ -273,17 +272,17 @@ function draw(){
 }
 setInterval(()=>{if(phase==='fly')draw()},35);
 
-function stC(){phase='wait';mult=1;cp=0;bets=[null,null];pts=[];uB();draw();document.getElementById('roundBar').textContent='PLACE BETS';document.getElementById('roundBar').className='st';pT=3;let cd=setInterval(()=>{pT--;document.getElementById('roundBar').textContent='NEXT: '+Math.ceil(pT)+'s';if(pts.length)pts=[];draw();if(pT<=0){clearInterval(cd);sF()}},1000)}
+function stC(){phase='wait';mult=1;cp=0;bets=[null,null,null];pts=[];uB();draw();document.getElementById('roundBar').textContent='PLACE BETS';document.getElementById('roundBar').className='st';pT=3;let cd=setInterval(()=>{pT--;document.getElementById('roundBar').textContent='NEXT: '+Math.ceil(pT)+'s';if(pts.length)pts=[];draw();if(pT<=0){clearInterval(cd);sF()}},1000)}
 function sF(){phase='fly';mult=1;cp=gCP();uB();document.getElementById('roundBar').textContent='>> FLYING <<';document.getElementById('roundBar').className='st go';(function step(){if(phase!=='fly')return;mult+=.02+mult*.003;if(Math.floor(mult*10)%4===0)draw();bets.forEach((b,i)=>{if(b&&!b.cashedOut){const t=b.ac||autoC[i];if(t&&mult>=t)cO(i)}});if(mult>=cp){eR(false);return}requestAnimationFrame(step)})()}
 function eR(cashed){phase='end';cp=cashed?mult:cp;hist.unshift(cp);if(hist.length>35)hist.pop();rH();bets.forEach((b,i)=>{if(b&&!b.cashedOut){b.cashedOut=true;b.cm=cp;b.won=0}});for(let i=0;i<16;i++)pts.push({x:W/2,y:H*.24,vx:(Math.random()-.5)*5,vy:-Math.random()*3,s:1+Math.random()*3,c:cashed?'#00e676':i%2?'#ff3d4f':'#ffb300',life:1});document.getElementById('roundBar').textContent=cashed?'EXIT '+cp.toFixed(2)+'×':'CRASH '+cp.toFixed(2)+'×';document.getElementById('roundBar').className='st over';uB();sR();draw();setTimeout(()=>{pts=[];stC()},3200)}
 function pB(s){if(phase!=='wait')return;const a=Math.max(1,Math.min(10000,parseInt(document.getElementById('in'+(s+1)).value)||1));document.getElementById('in'+(s+1)).value=a;const ac=parseFloat(document.getElementById('ac'+(s+1)).value);autoC[s]=ac>=1.01?parseFloat(ac.toFixed(2)):0;let ok=false;if(S.free>0){S.free--;ok=true}else if(S.coins>=a){S.coins-=a;ok=true}else{const gn=a*10;if(S.gold>=gn){S.gold-=gn;ok=true}else{toast('MAX: '+Math.floor(S.coins+S.gold/10),'y');return}}if(!ok)return;bets[s]={amt:a,cashedOut:false,cm:0,won:undefined,ac:autoC[s]};document.getElementById('bt'+(s+1)).textContent=autoC[s]?'🎯':'✓';document.getElementById('bt'+(s+1)).classList.add('ok');document.getElementById('co'+(s+1)).classList.add('on');uD()}
 function cO(s){if(phase!=='fly'||!bets[s]||bets[s].cashedOut)return;const wa=bets[s].ac&&mult>=bets[s].ac;bets[s].cashedOut=true;bets[s].cm=mult;bets[s].won=Math.floor(bets[s].amt*mult);S.gold+=bets[s].won;document.getElementById('co'+(s+1)).classList.remove('on');document.getElementById('re'+(s+1)).textContent=(wa?'🎯':'')+'+'+bets[s].won;document.getElementById('re'+(s+1)).className='res win';document.getElementById('re'+(s+1)).style.display='block';toast((wa?'AUTO ':'')+'+'+bets[s].won,'g');if(mult>=5&&scd<Date.now()){scd=Date.now()+6e4;setTimeout(()=>{S.coins+=2;toast('SHARE +2🎮','g');uD()},800)};uD()}
 function sR(){setTimeout(()=>{bets.forEach((b,i)=>{if(!b)return;const r=document.getElementById('re'+(i+1));r.style.display='block';if(b.won===undefined||b.won<=0){r.textContent='LOST';r.className='res lose'}else{r.textContent='+'+b.won;r.className='res win'}document.getElementById('co'+(i+1)).classList.remove('on')})},200);setTimeout(uB,2500)}
-function uB(){['bt1','bt2'].forEach((id,i)=>{const bb=document.getElementById(id),cb=document.getElementById('co'+(i+1)),re=document.getElementById('re'+(i+1));re.style.display='none';if(phase==='wait'){cb.classList.remove('on');if(bets[i]){bb.textContent='✓';bb.classList.add('ok')}else{bb.textContent='BET';bb.classList.remove('ok')}}else if(phase==='fly'){bb.textContent='--';bb.classList.remove('ok');if(bets[i]&&!bets[i].cashedOut)cb.classList.add('on');else cb.classList.remove('on')}})}
+function uB(){['bt1','bt2','bt3'].forEach((id,i)=>{const bb=document.getElementById(id),cb=document.getElementById('co'+(i+1)),re=document.getElementById('re'+(i+1));re.style.display='none';if(phase==='wait'){cb.classList.remove('on');if(bets[i]){bb.textContent='✓';bb.classList.add('ok')}else{bb.textContent='BET';bb.classList.remove('ok')}}else if(phase==='fly'){bb.textContent='--';bb.classList.remove('ok');if(bets[i]&&!bets[i].cashedOut)cb.classList.add('on');else cb.classList.remove('on')}})}
 function rH(){let t='';for(let i=0;i<40;i++){const m=hist[i%hist.length];if(!m)continue;t+=`<span class="${m>=2?'g':'r'}">${m.toFixed(2)}×</span>`}document.getElementById('tickerEl').innerHTML=t+(hist.length>0?t:'')}
-[1,2].forEach(s=>{document.getElementById('q'+s).addEventListener('click',e=>{const q=e.target.closest('b');if(!q?.dataset.v)return;document.querySelectorAll('#q'+s+' b').forEach(b=>b.classList.remove('on'));q.classList.add('on');document.getElementById('in'+s).value=q.dataset.v});document.getElementById('in'+s).addEventListener('input',function(){const v=parseInt(this.value);if(v&&v>=1)this.value=Math.min(10000,v)});document.getElementById('ac'+s).addEventListener('input',function(){const v=parseFloat(this.value);autoC[s-1]=v>=1.01?parseFloat(v.toFixed(2)):0})});
-document.getElementById('bt1').addEventListener('click',()=>pB(0));document.getElementById('bt2').addEventListener('click',()=>pB(1));
-document.getElementById('co1').addEventListener('click',()=>cO(0));document.getElementById('co2').addEventListener('click',()=>cO(1));
+[1,2,3].forEach(s=>{document.getElementById('q'+s).addEventListener('click',e=>{const q=e.target.closest('b');if(!q?.dataset.v)return;document.querySelectorAll('#q'+s+' b').forEach(b=>b.classList.remove('on'));q.classList.add('on');document.getElementById('in'+s).value=q.dataset.v});document.getElementById('in'+s).addEventListener('input',function(){const v=parseInt(this.value);if(v&&v>=1)this.value=Math.min(10000,v)});document.getElementById('ac'+s).addEventListener('input',function(){const v=parseFloat(this.value);autoC[s-1]=v>=1.01?parseFloat(v.toFixed(2)):0})});
+document.getElementById('bt1').addEventListener('click',()=>pB(0));document.getElementById('bt2').addEventListener('click',()=>pB(1));document.getElementById('bt3').addEventListener('click',()=>pB(2));
+document.getElementById('co1').addEventListener('click',()=>cO(0));document.getElementById('co2').addEventListener('click',()=>cO(1));document.getElementById('co3').addEventListener('click',()=>cO(2));
 
 function uD(){document.getElementById('cD').textContent=S.gold.toLocaleString();document.getElementById('fD').textContent=S.free;document.getElementById('gD').textContent=S.coins;document.getElementById('userName').textContent=user.name}
 function toast(m,c){const e=document.createElement('div');e.className='toast '+c;e.textContent=m;document.body.appendChild(e);setTimeout(()=>e.remove(),1400)}
