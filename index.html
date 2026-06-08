@@ -146,7 +146,7 @@ function draw(){
   gx.strokeStyle='rgba(0,229,255,.08)';gx.lineWidth=1;gx.beginPath();gx.moveTo(cx,0);gx.lineTo(cx,H*.75);gx.stroke();
 
   // ── HELIPAD (always visible) ──
-  const padX=W*.78,padY=H*.82;
+  const padX=W*.88,padY=H*.88;
   gx.strokeStyle='rgba(255,255,255,.1)';gx.lineWidth=2;
   gx.beginPath();gx.arc(padX,padY,32,0,Math.PI*2);gx.stroke();
   gx.strokeStyle='rgba(255,255,255,.06)';gx.lineWidth=1;
@@ -180,7 +180,7 @@ function draw(){
   if(phase==='fly'){
     const progress=Math.min(1,(dm-1)/22); // SLOWER: 1x→23x range
     const waveFreq=3.5,waveAmp=W*.08;
-    const sx=W*.78,sy=H*.82; // start from helipad
+    const sx=W*.88,sy=H*.88; // start from helipad
     const ex=W*.18,ey=H*.08; // end top-left
     const t=progress;
     const dx=ex-sx,dy=ey-sy;
@@ -276,7 +276,7 @@ function draw(){
   // ── EXPLOSION (phase==='end', completely separate from rocket) ──
   if(phase==='end'){
     const eProgress=Math.min(1,(cp-1)/14);
-    const esx=W*.78,esy=H*.82,eex=W*.18,eey=H*.08;
+    const esx=W*.88,esy=H*.88,eex=W*.18,eey=H*.08;
     const edx=eex-esx,edy=eey-esy,edist=Math.sqrt(edx*edx+edy*edy);
     const enx=-edy/edist,eny=edx/edist;
     const ewaveFreq=3.5,ewaveAmp=W*.08,et=Math.min(eProgress,.99);
