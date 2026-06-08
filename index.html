@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Rocket Crash</title>
+<style>
+:root{--bg:#0d0d0d;--srf:#141414;--card:#1a1a1a;--gold:#f0a020;--txt:#e8e8e8;--dim:#777;--grn:#00c853;--purp:#7c3aed;--red:#e53935;--cyan:#00bcd4}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--txt);display:flex;justify-content:center;min-height:100vh;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+.app{width:100%;max-width:420px;display:flex;flex-direction:column;height:100vh;height:100dvh}
+.top{display:flex;align-items:center;gap:4px;padding:8px 10px;background:var(--srf);flex-shrink:0;border-bottom:1px solid #222}
+.ti{font-size:11px;font-weight:600;padding:5px 9px;border-radius:6px;white-space:nowrap}
+.tg{background:rgba(240,160,32,.08);color:var(--gold);flex:1}
+.tm{background:rgba(0,188,212,.06);color:var(--cyan);font-size:10px}
+.th{background:rgba(124,58,237,.06);color:#b388ff}
+.tf{background:rgba(0,200,83,.06);color:var(--grn)}
+.tc{background:rgba(240,160,32,.06);color:#f5c060}
+.game{flex:1;position:relative;overflow:hidden;min-height:0}canvas{display:block;width:100%;height:100%}
+.hist-wrap{flex-shrink:0;background:var(--srf);border-top:1px solid #222;padding:5px 10px}
+.hist{display:flex;flex-wrap:wrap;gap:4px;max-height:54px;overflow:hidden;transition:max-height .3s}.hist.open{max-height:300px}
+.hist .hi{font-size:11px;font-weight:600;padding:3px 8px;border-radius:4px}.hist .hg{color:var(--grn);background:rgba(0,200,83,.08)}.hist .hr{color:var(--red);background:rgba(229,57,53,.08)}
+.hist-toggle{font-size:10px;color:var(--dim);cursor:pointer;font-weight:500;padding:3px 0;text-align:center}
+.round-bar{flex-shrink:0;padding:14px 10px;background:var(--srf);text-align:center;font-size:20px;font-weight:900;border-bottom:1px solid #222;letter-spacing:1px}
+.round-bar.wait{color:var(--dim)}.round-bar.fly{color:#fff}.round-bar.end{color:var(--red);animation:shake .4s ease-out}
+@keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-4px)}40%,80%{transform:translateX(4px)}}
+.bet-area{flex-shrink:0;background:var(--srf);padding:10px;border-bottom:1px solid #222;display:flex;flex-direction:column;gap:8px}
+.bet-row{display:flex;align-items:center;gap:6px}
+.bet-row .bl{font-size:12px;font-weight:700;color:var(--dim);width:24px;text-align:right;flex-shrink:0}
+.bet-row .bq{display:flex;gap:4px;flex:1}
+.bet-row .bqb{padding:8px 0;border-radius:6px;text-align:center;font-weight:600;cursor:pointer;font-size:13px;flex:1;background:var(--card);color:var(--dim);border:1px solid #333}
+.bet-row .bqb.on{border-color:var(--gold);color:var(--gold);background:rgba(240,160,32,.06)}
+.bet-row .bi{width:58px;background:var(--card);border:2px solid #444;border-radius:6px;padding:7px 4px;text-align:center;color:var(--txt);font-weight:600;font-size:14px;flex-shrink:0}
+.bet-row .bi:focus{outline:none;border-color:var(--gold);background:#222}
+.bet-row .bac{width:44px;background:rgba(239,68,68,.05);border:1px dashed rgba(239,68,68,.3);border-radius:6px;padding:7px 2px;text-align:center;color:#f87171;font-weight:600;font-size:10px;flex-shrink:0}
+.bet-row .bac:focus{outline:none;border-color:var(--red);border-style:solid;background:rgba(239,68,68,.1)}
+.ba{font-weight:700;font-size:12px;padding:8px 10px;border-radius:6px;border:1px solid;cursor:pointer;min-width:60px;text-align:center;flex-shrink:0}
+.ba-bet{background:var(--card);color:var(--cyan);border-color:#333}.ba-bet.ok{background:rgba(0,200,83,.08);color:var(--grn);border-color:rgba(0,200,83,.3)}
+.ba-cash{background:rgba(229,57,53,.1);color:#fff;border-color:var(--red);animation:cashP .7s ease-in-out infinite;display:none}.ba-cash.on{display:block}
+.ba-res{font-weight:700;font-size:12px;padding:8px 10px;border-radius:6px;min-width:60px;text-align:center;flex-shrink:0;display:none}
+.ba-win{background:rgba(0,200,83,.08);color:var(--grn);border:1px solid rgba(0,200,83,.3)}.ba-lose{background:rgba(229,57,53,.08);color:var(--red);border:1px solid rgba(229,57,53,.25)}
+@keyframes cashP{0%,100%{box-shadow:0 0 0 rgba(229,57,53,0)}50%{box-shadow:0 0 12px rgba(229,57,53,.4)}}
+.bottom{flex-shrink:0;background:var(--srf);padding:8px 10px;border-top:1px solid #222}
+.btns{display:flex;flex-wrap:wrap;gap:5px}
+.btn{flex:1;min-width:22%;background:var(--card);border-radius:8px;padding:10px 0;text-align:center;font-size:11px;font-weight:600;color:var(--txt);cursor:pointer;border:1px solid #2a2a2a}.btn:active{background:#222}.btn .bi{font-size:16px;display:block;margin-bottom:2px}
+.ov{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:80;display:flex;align-items:center;justify-content:center;animation:fi .15s}
+@keyframes fi{0%{opacity:0}100%{opacity:1}}
+.pu{background:var(--srf);border:1px solid #333;border-radius:12px;padding:16px;width:92%;max-width:370px;max-height:80vh;overflow-y:auto}
+.pu-t{font-size:15px;font-weight:700;margin-bottom:10px;display:flex;justify-content:space-between}.pu-x{color:var(--dim);cursor:pointer;font-size:22px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:5px}.gi{background:var(--card);border:1px solid #2a2a2a;border-radius:8px;padding:10px 6px;text-align:center;cursor:pointer}.gi:active{background:#222}.gi .gi-ico{font-size:22px}.gi .gi-m{font-size:11px;font-weight:600;margin:3px 0}.gi .gi-d{font-size:9px;color:var(--dim)}.gi .gi-c{font-size:11px;font-weight:600;color:var(--gold)}
+.rr{display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--card);margin-bottom:2px;font-size:12px;border-radius:6px}.rr.my{background:rgba(240,160,32,.06);border:1px solid rgba(240,160,32,.15)}.rr .rn{font-weight:700;font-size:14px;width:22px;text-align:center;color:var(--dim)}.rr .rn.g{color:#fbbf24}.rr .rn.s{color:#c0c0c0}.rr .rn.b{color:#d97706}
+.buy-btn{flex:1;text-align:center;padding:9px 5px;border-radius:6px;cursor:pointer;font-weight:600;font-size:10px;background:var(--card);color:var(--gold);border:1px solid #333}.best{background:rgba(124,58,237,.15);color:#fff;border-color:rgba(124,58,237,.3)}
+.miner-pg{position:fixed;inset:0;z-index:60;background:#1e3a5f;display:none;flex-direction:column;animation:fi .2s}.miner-pg.on{display:flex}
+.miner-top{display:flex;align-items:center;gap:6px;padding:10px 12px;background:rgba(0,0,0,.3);border-bottom:1px solid rgba(255,255,255,.1)}
+.miner-back{font-size:16px;cursor:pointer;padding:4px 8px;color:#fff}
+.miner-cv{flex:1;position:relative;overflow:hidden}.miner-cv canvas{display:block;width:100%;height:100%}
+.miner-cards{flex-shrink:0;padding:8px;display:flex;gap:6px;overflow-x:auto;background:rgba(0,0,0,.4)}
+.mc{flex:0 0 88px;background:rgba(0,0,0,.3);border-radius:8px;padding:10px 5px;text-align:center;border:1px solid rgba(255,255,255,.1);cursor:pointer}.mc:active{background:rgba(0,0,0,.5)}.mc.owned{border-color:rgba(0,200,83,.3)}.mc.active{border-color:var(--gold)}
+.mc .mci{font-size:26px;margin:2px 0}.mc .mcn{font-weight:600;font-size:10px;color:#fff}.mc .mcr{font-size:8px;color:rgba(255,255,255,.5)}.mc .mcc{font-weight:600;font-size:9px;color:var(--gold);margin-top:2px}
+.toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);font-weight:600;padding:10px 20px;border-radius:8px;font-size:12px;z-index:100;pointer-events:none;animation:ti .2s ease-out,to .3s 1.5s ease-out forwards}
+.toast.n{background:#222;color:var(--gold);border:1px solid #333}.toast.r{background:#1a2a1a;color:var(--grn);border:1px solid rgba(0,200,83,.2)}.toast.l{background:#1a1a2a;color:#b388ff;border:1px solid rgba(124,58,237,.2)}
+@keyframes ti{0%{opacity:0;transform:translateX(-50%) translateY(-10px)}100%{opacity:1;transform:translateX(-50%) translateY(0)}}@keyframes to{0%{opacity:1}100%{opacity:0}}
+</style>
+</head>
+<body>
+<div class="app">
+<div class="top"><div class="ti tg">🪙<span id="cD">500</span></div><div class="ti tm">⛏<span id="mLv">Free</span> <span id="mRt">+4/h</span></div><div class="ti th">⚡<span id="hD">0</span></div><div class="ti tf">🆓<span id="fD">3</span></div><div class="ti tc">🎮<span id="gD">10</span></div><div class="ti" style="background:rgba(255,255,255,.04);color:#fff;cursor:pointer;font-size:10px" id="btnProfile" title="Profile">👤 <span id="userName">--</span></div></div>
+<div class="game" id="gameWrap"><canvas id="gc"></canvas></div>
+<div class="hist-wrap"><div class="hist" id="histBar"></div><div class="hist-toggle" id="histTg">Full History ▼</div></div>
+<div class="round-bar wait" id="roundBar">PLACE YOUR BETS</div>
+<div class="bet-area">
+  <div class="bet-row"><span class="bl">1</span><div class="bq" id="q1"><div class="bqb on" data-v="1">1</div><div class="bqb" data-v="5">5</div><div class="bqb" data-v="10">10</div></div><input class="bi" id="in1" value="1" type="number" inputmode="numeric" placeholder="💰"><span style="font-size:9px;color:var(--dim);flex-shrink:0">@</span><input class="bac" id="ac1" value="" type="number" inputmode="decimal" placeholder="止盈x" step="0.1"><button class="ba ba-bet" id="bt1">BET</button><button class="ba ba-cash" id="co1">CASH OUT</button><div class="ba ba-res" id="re1">--</div></div>
+  <div class="bet-row"><span class="bl">2</span><div class="bq" id="q2"><div class="bqb" data-v="1">1</div><div class="bqb on" data-v="5">5</div><div class="bqb" data-v="10">10</div></div><input class="bi" id="in2" value="5" type="number" inputmode="numeric" placeholder="💰"><span style="font-size:9px;color:var(--dim);flex-shrink:0">@</span><input class="bac" id="ac2" value="" type="number" inputmode="decimal" placeholder="止盈x" step="0.1"><button class="ba ba-bet" id="bt2">BET</button><button class="ba ba-cash" id="co2">CASH OUT</button><div class="ba ba-res" id="re2">--</div></div>
+</div>
+<div class="bottom"><div class="btns"><div class="btn" id="btnMine"><span class="bi">⛏️</span>Mine</div><div class="btn" id="btnMarket"><span class="bi">💎</span>Shop</div><div class="btn" id="btnRank"><span class="bi">🏆</span>Rank</div><div class="btn" id="btnInvite"><span class="bi">📤</span>Invite</div></div></div>
+<div class="miner-pg" id="minerPg">
+  <div class="miner-top"><span class="miner-back" id="minerBack">← Back</span><span style="background:rgba(240,160,32,.1);color:var(--gold);flex:1;font-weight:700;padding:5px 10px;border-radius:6px">🪙 <span id="mG">0</span></span><span style="background:rgba(0,200,83,.1);color:var(--grn);font-weight:700;padding:5px 10px;border-radius:6px">⛏ <span id="mR">0</span>/s</span></div>
+  <div class="miner-cv" id="minerCv"><canvas id="mc"></canvas></div>
+  <div class="miner-cards" id="minerCd"></div>
+</div>
+</div>
+
+<script>
+// User system
+let user={id:'player_'+Math.random().toString(36).slice(2,8),name:'Miner_'+Math.random().toString(36).slice(2,6)};
+if(window.Telegram&&window.Telegram.WebApp){const tg=window.Telegram.WebApp;tg.ready();user={id:tg.initDataUnsafe?.user?.id||user.id,name:tg.initDataUnsafe?.user?.first_name||tg.initDataUnsafe?.user?.username||user.name};tg.expand()}
+const saved=localStorage.getItem('ruser');if(saved)try{const u=JSON.parse(saved);user={...user,...u}}catch(e){}
+function saveUser(){localStorage.setItem('ruser',JSON.stringify(user))}
+saveUser();
+const S={gold:500,hash:0,totalHash:30,coins:10,free:3,activeMiner:0,minerExp:0};
+const mDefs=[{n:'Free Miner',i:'⛏️',rate:3/86400,usd:'$0',d:'3 coins/day',t:'🆓'},{n:'Apprentice',i:'🧑‍🌾',rate:38.87/86400,usd:'$2.99',d:'~39 coins/day',t:'T1'},{n:'Miner',i:'👷',rate:103.87/86400,usd:'$7.99',d:'~104 coins/day',t:'T2'},{n:'Engineer',i:'🦺',rate:259.87/86400,usd:'$19.99',d:'~260 coins/day',t:'T3'},{n:'AI Robot',i:'🤖',rate:649.87/86400,usd:'$49.99',d:'~650 coins/day',t:'T4'}];
+const shopM=[{m:'Qwen 3.5',i:'🟤',c:5,d:'Fast',tag:'HOT',tc:'#f87171'},{m:'DeepSeek V4',i:'⚪',c:15,d:'Best',tag:'HOT',tc:'#f87171'},{m:'GLM-5',i:'🟡',c:50,d:'Balanced',tag:'NEW',tc:'#4ade80'},{m:'Kimi K2.5',i:'💎',c:150,d:'Long ctx',tag:'PRO',tc:'#c4b5fd'},{m:'Claude 4',i:'🔮',c:500,d:'Top',tag:'PRO',tc:'#c4b5fd'},{m:'Opus',i:'👑',c:2000,d:'Ultimate',tag:'PRO',tc:'#c4b5fd'}];
+const mockR=[{n:'CryptoKing',g:8520000},{n:'MineMaster',g:6230000},{n:'GoldRush',g:4910000},{n:'DeepMiner',g:3840000},{n:'HookLord',g:2750000},{n:'DiamondHands',g:1920000}];
+
+// ── ROCKET ──
+const gw=document.getElementById('gameWrap'),gc=document.getElementById('gc'),gx=gc.getContext('2d');let W,H;function rs(){const r=gw.getBoundingClientRect();W=gc.width=r.width*2;H=gc.height=r.height*2}rs();window.addEventListener('resize',()=>{rs();draw()});
+const past=[];let particles=[],phase='wait',phaseT=3,mult=1,cp=0,bets=[null,null],boostMult=1,boostEnd=0;
+function genCP(){const r=Math.random();if(r<.015)return 1;if(r<.38)return 1.1+Math.random()*1.5;if(r<.68)return 2.5+Math.random()*3;if(r<.86)return 5+Math.random()*8;if(r<.96)return 10+Math.random()*25;return 30+Math.random()*120}
+function draw(){gx.clearRect(0,0,W,H);const cx=W/2;const bg=gx.createLinearGradient(0,0,0,H);bg.addColorStop(0,'#0d0d0d');bg.addColorStop(1,'#111');gx.fillStyle=bg;gx.fillRect(0,0,W,H);gx.strokeStyle='rgba(255,255,255,.03)';for(let i=1;i<12;i++){gx.beginPath();gx.moveTo(0,i*H*.04);gx.lineTo(W,i*H*.04);gx.stroke()}
+  const dm=phase==='fly'?mult:(phase==='end'?cp:1);
+  if(phase==='wait'&&phaseT>0){const sec=Math.ceil(phaseT);gx.fillStyle='rgba(255,255,255,.06)';gx.beginPath();gx.arc(cx,H*.42,50,0,Math.PI*2);gx.fill();gx.strokeStyle='rgba(255,255,255,.15)';gx.lineWidth=2;gx.beginPath();gx.arc(cx,H*.42,50,0,Math.PI*2);gx.stroke();gx.fillStyle='#fff';gx.font='bold 48px sans-serif';gx.textAlign='center';gx.fillText(sec,cx,H*.42+15)}
+  gx.fillStyle=phase==='end'?'#e53935':phase==='fly'?'#4ade80':'rgba(255,255,255,.1)';gx.font=`bold ${phase==='fly'?60:34}px sans-serif`;gx.textAlign='center';if(phase!=='wait'||phaseT<=0)gx.fillText(dm.toFixed(2)+'x',cx,phase==='fly'?H*.24:H*.18);
+  if(phase==='fly'||phase==='end'){const ry=H*.12+(1-dm/15)*H*.28,cy=Math.max(H*.03,Math.min(H*.4,ry));if(phase==='fly'){gx.fillStyle='#f97316';gx.beginPath();gx.moveTo(cx-10,cy+16);gx.lineTo(cx,cy+36+Math.random()*10);gx.lineTo(cx+10,cy+16);gx.fill();gx.fillStyle='#fbbf24';gx.beginPath();gx.moveTo(cx-6,cy+13);gx.lineTo(cx,cy+24+Math.random()*6);gx.lineTo(cx+6,cy+13);gx.fill()}const gd=gx.createLinearGradient(cx,cy-22,cx,cy+16);gd.addColorStop(0,'#f1f5f9');gd.addColorStop(.5,'#cbd5e1');gd.addColorStop(1,'#64748b');gx.fillStyle=gd;gx.beginPath();gx.moveTo(cx,cy-22);gx.quadraticCurveTo(cx+11,cy-5,cx+11,cy+10);gx.lineTo(cx-11,cy+10);gx.quadraticCurveTo(cx-11,cy-5,cx,cy-22);gx.fill();gx.fillStyle='#ef4444';gx.beginPath();gx.moveTo(cx-11,cy+3);gx.lineTo(cx-16,cy+14);gx.lineTo(cx-9,cy+9);gx.fill();gx.beginPath();gx.moveTo(cx+11,cy+3);gx.lineTo(cx+16,cy+14);gx.lineTo(cx+9,cy+9);gx.fill();gx.fillStyle='#ef4444';gx.beginPath();gx.moveTo(cx,cy-28);gx.quadraticCurveTo(cx+5,cy-16,cx+8,cy-22);gx.quadraticCurveTo(cx-8,cy-22,cx-5,cy-16);gx.fill();gx.fillStyle='#60a5fa';gx.beginPath();gx.arc(cx,cy-7,6,0,Math.PI*2);gx.fill();gx.fillStyle='rgba(255,255,255,.3)';gx.beginPath();gx.arc(cx-2,cy-9,2,0,Math.PI*2);gx.fill();if(phase==='end')for(let i=0;i<8;i++){gx.fillStyle=`rgba(239,68,68,${Math.random()*.25})`;gx.beginPath();gx.arc(cx+(Math.random()-.5)*28,cy+(Math.random()-.5)*16,1+Math.random()*3,0,Math.PI*2);gx.fill()}}else if(phaseT<=0){gx.font='44px serif';gx.textAlign='center';gx.fillText('🚀',cx,H*.34)}
+  particles=particles.filter(p=>p.life>0);particles.forEach(p=>{p.life-=.014;p.y-=p.vy;p.vy+=.05;p.x+=p.vx;gx.globalAlpha=p.life;gx.fillStyle=p.color;gx.beginPath();gx.arc(p.x,p.y,p.s,0,Math.PI*2);gx.fill()});gx.globalAlpha=1}
+function startCD(){phase='wait';mult=1;cp=0;bets=[null,null];updateBtns();document.getElementById('roundBar').textContent='⏳ PLACE YOUR BETS NOW';document.getElementById('roundBar').className='round-bar wait';phaseT=3;draw();let cd=setInterval(()=>{phaseT--;document.getElementById('roundBar').textContent='⏳ NEXT ROUND IN '+Math.ceil(phaseT)+'s';draw();if(phaseT<=0){clearInterval(cd);startFly()}},1000)}
+function startFly(){phase='fly';mult=1;cp=genCP();updateBtns();document.getElementById('roundBar').textContent='🚀 FLYING — TAP CASH OUT!';document.getElementById('roundBar').className='round-bar fly';(function step(){if(phase!=='fly')return;mult+=.02+mult*.003;draw();
+  // Auto-cashout check (use bet's stored value or global)
+  bets.forEach((b,i)=>{if(b&&!b.cashedOut){const target=b.autoCash||autoCash[i];if(target&&mult>=target)cashOutBet(i)}});
+  if(mult>=cp){endR(false);return}requestAnimationFrame(step)})()}
+function endR(cashed){phase='end';cp=cashed?mult:cp;past.unshift(cp);if(past.length>25)past.pop();renderHist();bets.forEach((b,i)=>{if(b&&!b.cashedOut){b.cashedOut=true;b.cashM=cp;b.won=0}});for(let i=0;i<25;i++)particles.push({x:W/2,y:H*.24,vx:(Math.random()-.5)*7,vy:-Math.random()*5,s:1+Math.random()*4,color:cashed?'#4ade80':i%2?'#ef4444':'#f97316',life:1});document.getElementById('roundBar').textContent=cashed?`✅ CASHED OUT @ ${cp.toFixed(2)}x`:`💥 CRASHED @ ${cp.toFixed(2)}x`;document.getElementById('roundBar').className='round-bar end';updateBtns();showRes();draw();setTimeout(startCD,3000)}
+function placeBet(s){if(phase!=='wait')return;const inputEl=document.getElementById('in'+(s+1));let amt=parseInt(inputEl.value)||1;amt=Math.max(1,Math.min(10000,amt));inputEl.value=amt;
+  // Read auto-cashout on BET (in case user typed but didn't trigger input event)
+  const acv=parseFloat(document.getElementById('ac'+(s+1)).value);autoCash[s]=acv>=1.01?parseFloat(acv.toFixed(2)):0;
+  let paid=false;if(S.free>0){S.free--;paid=true}else if(S.coins>=amt){S.coins-=amt;paid=true}else{const goldNeeded=amt*10;if(S.gold>=goldNeeded){S.gold-=goldNeeded;paid=true}else{const maxAfford=Math.floor((S.coins+S.gold/10));toast(`Can only afford ${maxAfford} (${S.coins}🎮 + ${S.gold}🪙)`,'n');return}}if(!paid)return;
+  bets[s]={amount:amt,cashedOut:false,cashM:0,won:undefined,autoCash:autoCash[s]};
+  document.getElementById('bt'+(s+1)).textContent=autoCash[s]?'🎯':'✅';document.getElementById('bt'+(s+1)).classList.add('ok');
+  document.getElementById('co'+(s+1)).classList.add('on');upd()}
+function cashOutBet(s){if(phase!=='fly'||!bets[s]||bets[s].cashedOut)return;const wasAuto=bets[s].autoCash&&mult>=bets[s].autoCash;bets[s].cashedOut=true;bets[s].cashM=mult;bets[s].won=Math.floor(bets[s].amount*mult);S.gold+=bets[s].won;document.getElementById('co'+(s+1)).classList.remove('on');document.getElementById('re'+(s+1)).textContent=(wasAuto?'🎯':'')+'+'+bets[s].won;document.getElementById('re'+(s+1)).className='ba ba-res ba-win';document.getElementById('re'+(s+1)).style.display='block';toast((wasAuto?'🎯 AUTO! ':'')+'+'+bets[s].won+' ('+mult.toFixed(2)+'x)','r');upd()}
+function showRes(){setTimeout(()=>{bets.forEach((b,i)=>{if(!b)return;const r=document.getElementById('re'+(i+1));r.style.display='block';if(b.won===undefined||b.won<=0){r.textContent='LOST';r.className='ba ba-res ba-lose'}else{r.textContent='+'+b.won;r.className='ba ba-res ba-win';if(b.cashM>=5&&shareCD<Date.now()){shareCD=Date.now()+60000;setTimeout(()=>{toast('📤 Share your '+b.cashM.toFixed(1)+'x win! (+2🎮)','r');S.coins+=2;upd()},800)}}document.getElementById('co'+(i+1)).classList.remove('on')})},200);setTimeout(updateBtns,2500)}
+function updateBtns(){['bt1','bt2'].forEach((id,i)=>{const bb=document.getElementById(id),cb=document.getElementById('co'+(i+1)),re=document.getElementById('re'+(i+1));re.style.display='none';if(phase==='wait'){cb.classList.remove('on');if(bets[i]){bb.textContent='✅';bb.classList.add('ok')}else{bb.textContent='BET';bb.classList.remove('ok')}}else if(phase==='fly'){bb.textContent='--';bb.classList.remove('ok');if(bets[i]&&!bets[i].cashedOut)cb.classList.add('on');else cb.classList.remove('on')}})}
+function renderHist(){document.getElementById('histBar').innerHTML=past.map(m=>`<span class="hi ${m>=2?'hg':'hr'}">${m.toFixed(2)}x</span>`).join('')}
+document.getElementById('histTg').addEventListener('click',function(){const h=document.getElementById('histBar');if(h.classList.contains('open')){h.classList.remove('open');this.textContent='Full History ▼'}else{h.classList.add('open');this.textContent='Collapse ▲'}});
+let autoCash=[0,0]; // target multipliers for auto-cashout (0=off)
+[1,2].forEach(s=>{document.getElementById('q'+s).addEventListener('click',e=>{const q=e.target.closest('.bqb');if(!q)return;document.querySelectorAll('#q'+s+' .bqb').forEach(b=>b.classList.remove('on'));q.classList.add('on');document.getElementById('in'+s).value=q.dataset.v});document.getElementById('in'+s).addEventListener('input',function(){const v=parseInt(this.value);if(v&&v>=1){this.value=Math.min(10000,v);document.querySelectorAll('#q'+s+' .bqb').forEach(b=>b.classList.remove('on'))}});document.getElementById('ac'+s).addEventListener('input',function(){const v=parseFloat(this.value);autoCash[s-1]=v>=1.01?parseFloat(v.toFixed(2)):0;if(autoCash[s-1])this.style.borderColor='var(--red)';else this.style.borderColor='rgba(239,68,68,.3)'})});
+document.getElementById('bt1').addEventListener('click',()=>placeBet(0));document.getElementById('bt2').addEventListener('click',()=>placeBet(1));
+document.getElementById('co1').addEventListener('click',()=>cashOutBet(0));document.getElementById('co2').addEventListener('click',()=>cashOutBet(1));
+setInterval(()=>{draw()},50);
+
+document.getElementById('userName').textContent=user.name; // show username
+function upd(){document.getElementById('cD').textContent=S.gold.toLocaleString();document.getElementById('hD').textContent=S.hash.toLocaleString();document.getElementById('fD').textContent=S.free;document.getElementById('gD').textContent=S.coins;document.getElementById('userName').textContent=user.name;const now=Date.now()/1000,active=S.activeMiner>0&&S.minerExp>now;let tr=3/86400;if(active)tr+=mDefs[S.activeMiner].rate;document.getElementById('mLv').textContent=active?mDefs[S.activeMiner].n.split(' ')[0]:'Free';document.getElementById('mRt').textContent='+'+Math.floor(tr*3600)+'/h'}
+function toast(msg,t){const el=document.createElement('div');el.className='toast '+(t||'n');el.textContent=msg;document.body.appendChild(el);setTimeout(()=>el.remove(),1800)}
+function popup(t,b,cb){const ov=document.createElement('div');ov.className='ov';ov.id='ap';ov.innerHTML=`<div class="pu"><div class="pu-t">${t}<span class="pu-x" id="cp">✕</span></div>${b}</div>`;ov.addEventListener('click',e=>{if(e.target===ov||e.target.id==='cp')ov.remove()});document.body.appendChild(ov);if(cb)setTimeout(cb,100)}
+document.getElementById('btnMarket').addEventListener('click',()=>{
+  const usdtAddr='YOUR_TRC20_ADDRESS_HERE'; // ← 改成你的USDT TRC20地址
+  let shopTab='coins';
+  function shopHTML(){
+    if(shopTab==='coins')return `
+      <div style="display:flex;gap:4px;margin-bottom:10px">
+        <div class="buy-btn" style="flex:1;text-align:center;padding:8px;font-size:13px;background:var(--gold);color:#000;border:none">🪙 Buy</div>
+        <div class="buy-btn" style="flex:1;text-align:center;padding:8px;font-size:13px" id="swMiners">⛏️ Miners</div>
+        <div class="buy-btn" style="flex:1;text-align:center;padding:8px;font-size:13px" id="swSend">📤 Send</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div class="buy-btn" style="display:flex;justify-content:space-between;padding:12px" data-b="10">💰 10🎮<span style="font-weight:900;color:#4ade80">$1</span></div>
+        <div class="buy-btn" style="display:flex;justify-content:space-between;padding:12px" data-b="60">💰 60🎮<span style="font-weight:900;color:#4ade80">$5 <span style="font-size:9px;color:var(--dim)">+10🎮</span></span></div>
+        <div class="buy-btn best" style="display:flex;justify-content:space-between;padding:12px" data-b="300">💰 300🎮<span style="font-weight:900;color:#fff">$20 <span style="font-size:9px">+100🎮</span></span></div>
+        <div class="buy-btn" style="display:flex;justify-content:space-between;padding:12px" data-b="1000">👑 1000🎮<span style="font-weight:900;color:#fbbf24">$50 <span style="font-size:9px;color:var(--dim)">+500🎮</span></span></div>
+      </div>`;
+    else if(shopTab==='miners')return `
+      <div style="display:flex;gap:4px;margin-bottom:10px">
+        <div class="buy-btn" style="flex:1;text-align:center;padding:8px;font-size:13px" id="swCoins">🪙 Buy</div>
+        <div class="buy-btn" style="flex:1;text-align:center;padding:8px;font-size:13px;background:var(--gold);color:#000;border:none">⛏️ Miners</div>
+        <div class="buy-btn" style="flex:1;text-align:center;padding:8px;font-size:13px" id="swSend">📤 Send</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        ${mDefs.slice(1).map((m,i)=>`<div class="buy-btn" style="display:flex;justify-content:space-between;padding:12px" data-miner="${i+1}">
+          <span>${m.i} ${m.n} ${m.t}</span><span style="font-weight:900;color:#fbbf24">${m.usd}</span></div>`).join('')}
+        <div style="font-size:10px;color:var(--dim);text-align:center">24h duration · auto-mining · stacks with free miner</div>
+      </div>`;
+    else return `
+      <div style="display:flex;gap:4px;margin-bottom:10px">
+        <div class="buy-btn" style="flex:1;text-align:center;padding:8px;font-size:13px" id="swCoins">🪙 Buy</div>
+        <div class="buy-btn" style="flex:1;text-align:center;padding:8px;font-size:13px" id="swMiners">⛏️ Miners</div>
+        <div class="buy-btn" style="flex:1;text-align:center;padding:8px;font-size:13px;background:var(--gold);color:#000;border:none">📤 Send</div>
+      </div>
+      <div style="text-align:center;padding:10px">
+        <div style="font-weight:700;margin-bottom:8px">📤 Send Coins to Friend</div>
+        <div style="font-size:10px;color:var(--dim);margin-bottom:4px;word-break:break-all">Your ID: ${user.id}</div>
+        <div style="font-size:11px;color:var(--dim);margin-bottom:6px">Balance: 🎮${S.coins} | 🪙${S.gold.toLocaleString()}</div>
+        <input id="sendTo" placeholder="Friend's Player ID or @name" style="width:100%;background:var(--card);border:1px solid #333;border-radius:6px;padding:10px;color:var(--txt);font-size:12px;margin-bottom:6px;text-align:center">
+        <div style="display:flex;gap:6px;margin-bottom:8px">
+          <div class="bqb on" style="padding:8px;font-size:12px;flex:1" data-sv="5">5🎮</div>
+          <div class="bqb" style="padding:8px;font-size:12px;flex:1" data-sv="10">10🎮</div>
+          <div class="bqb" style="padding:8px;font-size:12px;flex:1" data-sv="50">50🎮</div>
+        </div>
+        <input id="sendAmt" placeholder="Custom amount" style="width:100%;background:var(--card);border:1px solid #333;border-radius:6px;padding:10px;color:var(--txt);font-size:12px;margin-bottom:8px;text-align:center" type="number" inputmode="numeric">
+        <div class="buy-btn" style="width:100%;background:#22c55e;color:#000;font-weight:800;padding:12px;display:block" id="btnSend">📤 Send Coins</div>
+        <div style="font-size:9px;color:var(--dim);margin-top:6px">Coins are deducted instantly · Non-refundable</div>
+      </div>`;
+  }
+  popup('💎 Shop',
+    `<div style="text-align:center;padding:4px" id="shopContent">${shopHTML()}</div>
+    <div style="margin-top:10px;font-size:10px;color:var(--dim);text-align:center">
+      Send USDT (TRC20):<br>
+      <span style="background:var(--card);padding:6px 8px;border-radius:6px;font-size:9px;word-break:break-all;color:var(--cyan);display:block;margin:4px 0" id="usdtAddr">${usdtAddr}</span>
+      <div class="buy-btn" style="width:100%;padding:8px;font-size:12px;text-align:center;cursor:pointer;background:rgba(34,211,238,.1);color:var(--cyan);border:1px solid rgba(34,211,238,.3);font-weight:700" onclick="navigator.clipboard.writeText('${usdtAddr}').then(()=>this.textContent='✅ Copied!').catch(()=>this.textContent='Long press to copy')">📋 Copy Address</div>
+      <span style="font-size:8px;color:#f87171">⚠️ DM @your_bot with tx hash</span>
+    </div>`,
+    ()=>{
+      document.getElementById('swMiners')?.addEventListener('click',()=>{shopTab='miners';document.getElementById('shopContent').innerHTML=shopHTML();rebindShop()});
+      document.getElementById('swCoins')?.addEventListener('click',()=>{shopTab='coins';document.getElementById('shopContent').innerHTML=shopHTML();rebindShop()});
+      document.getElementById('swSend')?.addEventListener('click',()=>{shopTab='send';document.getElementById('shopContent').innerHTML=shopHTML();rebindShop()});
+      rebindShop();
+    }
+  );
+  function rebindShop(){
+    document.querySelectorAll('[data-b]').forEach(el=>el.onclick=()=>{S.coins+=parseInt(el.dataset.b);toast('💳 +'+el.dataset.b+'🎮','r');document.getElementById('ap')?.remove();upd()});
+    document.querySelectorAll('[data-miner]').forEach(el=>el.onclick=()=>{const i=parseInt(el.dataset.miner);S.activeMiner=i;S.minerExp=Date.now()/1000+86400;toast('⛏ '+mDefs[i].n+' 24h!','r');document.getElementById('ap')?.remove();upd()});
+    // Send tab quick buttons
+    document.querySelectorAll('[data-sv]').forEach(el=>el.onclick=()=>{document.querySelectorAll('[data-sv]').forEach(e=>e.classList.remove('on'));el.classList.add('on');document.getElementById('sendAmt').value=el.dataset.sv});
+    document.getElementById('btnSend')?.addEventListener('click',()=>{
+      const to=document.getElementById('sendTo').value.trim();
+      const amt=parseInt(document.getElementById('sendAmt').value)||0;
+      if(!to){toast('Enter player ID','n');return}
+      if(amt<1||amt>10000){toast('Amount: 1-10000','n');return}
+      if(S.coins<amt){toast(`Only ${S.coins}🎮 available`,'n');return}
+      S.coins-=amt;toast(`📤 Sent ${amt}🎮 to ${to}!`,'r');document.getElementById('ap')?.remove();upd();
+    });
+  }
+});
+document.getElementById('btnRank').addEventListener('click',()=>{const t=S.gold+S.totalHash*10;popup('🏆 Leaderboard',
+    '<div style="font-size:12px;font-weight:700;margin-bottom:6px;color:var(--dim)">Gold Ranking</div>'+
+    [{n:'>>> YOU <<<',g:t,my:true},...mockR].sort((a,b)=>b.g-a.g).map((r,i)=>`<div class="rr${r.my?' my':''}"><span class="rn${i<3?' '+(i===0?'g':i===1?'s':'b'):''}">#${i+1}</span><span style="flex:1">${r.n}</span><span style="font-weight:700;color:var(--gold)">🪙${r.g.toLocaleString()}</span></div>`).join('')+
+    '<div style="font-size:12px;font-weight:700;margin:12px 0 6px;color:var(--dim)">📤 Weekly Invite Ranking</div>'+
+    '<div class="rr"><span class="rn g">#1</span><span style="flex:1">InviteKing</span><span style="font-weight:700;color:var(--grn)">23 invites</span></div>'+
+    '<div class="rr"><span class="rn s">#2</span><span style="flex:1">ShareLord</span><span style="font-weight:700;color:var(--grn)">17 invites</span></div>'+
+    '<div class="rr"><span class="rn b">#3</span><span style="flex:1">FriendZone</span><span style="font-weight:700;color:var(--grn)">12 invites</span></div>'+
+    `<div class="rr my"><span class="rn">#${4+Math.floor(Math.random()*7)}</span><span style="flex:1">>>> YOU <<<</span><span style="font-weight:700;color:var(--grn)">${inviteCount} invites</span></div>`+
+    '<div style="font-size:9px;color:var(--dim);margin-top:6px;text-align:center">Top 3: 50🎮 / 30🎮 / 15🎮 bonus every Monday</div>'
+  )});
+let inviteCount=0,invitedBy=null,shareCD=0;
+document.getElementById('btnProfile').addEventListener('click',()=>{popup('👤 Profile',
+  `<div style="text-align:center;padding:8px">
+    <div style="font-size:48px">${user.avatar||'👷'}</div>
+    <div style="font-weight:800;font-size:16px;margin:6px 0">${user.name}</div>
+    <div style="font-size:10px;color:var(--dim);word-break:break-all">ID: ${user.id}</div>
+    <div style="margin-top:8px;display:flex;gap:4px;justify-content:center">
+      <div class="ti tg" style="font-size:11px">🪙${S.gold.toLocaleString()}</div>
+      <div class="ti tc" style="font-size:11px">🎮${S.coins}</div>
+    </div>
+    <div style="margin-top:10px;font-size:10px;color:var(--dim)">Edit name:</div>
+    <input id="editName" value="${user.name}" style="width:100%;background:var(--card);border:1px solid #333;border-radius:6px;padding:8px;color:var(--txt);font-size:12px;text-align:center;margin:4px 0">
+    <div class="buy-btn" style="width:100%;background:#22c55e;color:#000;font-weight:800;padding:10px;display:block" id="btnSaveName">💾 Save</div>
+    <div style="font-size:9px;color:var(--dim);margin-top:4px">This is how friends find you for transfers</div>
+  </div>`,
+  ()=>{document.getElementById('btnSaveName').onclick=()=>{user.name=document.getElementById('editName').value.trim()||user.name;saveUser();toast('✅ Name saved!','r');document.getElementById('ap')?.remove();upd()}})});
+document.getElementById('btnInvite').addEventListener('click',()=>{
+  const refCode=Math.random().toString(36).slice(2,8);
+  popup('📤 Invite & Earn',
+    `<div style="text-align:center;padding:8px">
+      <div style="font-size:40px">📤</div>
+      <div style="font-weight:800;font-size:14px;margin:8px 0">Invite Friends = Rewards</div>
+      <div style="display:flex;flex-direction:column;gap:6px;text-align:left;margin:10px 0">
+        <div style="display:flex;align-items:center;gap:8px;padding:8px;background:var(--card);border-radius:8px">
+          <span style="font-size:20px">🥉</span><div><b>Friend joins</b><br><span style="font-size:11px;color:var(--dim)">You +3🎮 +1🆓 | Friend +5🎮</span></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;padding:8px;background:var(--card);border-radius:8px">
+          <span style="font-size:20px">🥈</span><div><b>Friend plays 10 rounds</b><br><span style="font-size:11px;color:var(--dim)">You +5🎮 bonus</span></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;padding:8px;background:var(--card);border-radius:8px">
+          <span style="font-size:20px">🥇</span><div><b>Friend buys a miner</b><br><span style="font-size:11px;color:var(--dim)">You +10🎮 +50⚡</span></div>
+        </div>
+      </div>
+      <div style="font-size:11px;font-weight:700;margin:8px 0">Your invite link:</div>
+      <div style="font-size:10px;color:var(--dim);word-break:break-all;background:var(--card);padding:10px;border-radius:8px;margin-bottom:8px">t.me/rocket_bot?start=ref_${refCode}</div>
+      <div class="buy-btn" style="width:100%;background:#22c55e;color:#000;font-weight:800;padding:12px;display:block" id="simInv">🔄 Simulate: Friend joined! (+3🎮 +1🆓)</div>
+      <div style="font-size:9px;color:var(--dim);margin-top:6px">You've invited: ${inviteCount} friends</div>
+    </div>`,
+    ()=>{
+      document.getElementById('simInv').onclick=()=>{
+        inviteCount++;S.coins+=3;S.free++;upd();
+        toast('📤 Friend joined! +3🎮 +1🆓','r');document.getElementById('ap')?.remove();
+        // Simulate active friend after delay
+        setTimeout(()=>{S.coins+=5;toast('🥈 Friend played 10 rounds! +5🎮','r');upd()},3000);
+      };
+    }
+  );
+});
+document.addEventListener('click',e=>{if(e.target.dataset.b){S.coins+=parseInt(e.target.dataset.b);toast('Added!','r');document.getElementById('ap')?.remove();upd()}});
+
+// ── MINER PAGE (Gold Miner style) ──
+const Mc=document.getElementById('mc'),Mgx=Mc.getContext('2d');let MW,MH,minerAF=null;
+function mRs(){const r=document.getElementById('minerCv').getBoundingClientRect();MW=Mc.width=r.width*2;MH=Mc.height=r.height*2}
+function rMC(){document.getElementById('minerCd').innerHTML=mDefs.map((m,i)=>{const now=Date.now()/1000,active=S.activeMiner===i+1&&S.minerExp>now;let c='',ct;if(active)c='active';else if(i===0&&S.minerExp>now)c='owned';if(active)ct='⏳'+Math.ceil((S.minerExp-now)/3600)+'h';else if(i===0)ct='🆓 FREE';else ct=m.usd;return `<div class="mc ${c}" data-mi="${i}"><div class="mci">${m.i}</div><div class="mcn">${m.n} ${m.t}</div><div class="mcr">${m.d}</div><div class="mcc">${ct}</div></div>`}).join('')}
+function dM(){Mgx.clearRect(0,0,MW,MH);const cx=MW/2,t=Date.now()*.001,active=S.activeMiner>0&&S.minerExp>Date.now()/1000,tier=active?S.activeMiner:0;const skyY=MH*.58,groundY=skyY;
+  // Sky
+  const sky=Mgx.createLinearGradient(0,0,0,skyY);sky.addColorStop(0,'#3b82f6');sky.addColorStop(.5,'#60a5fa');sky.addColorStop(1,'#93c5fd');Mgx.fillStyle=sky;Mgx.fillRect(0,0,MW,skyY);
+  Mgx.fillStyle='rgba(255,255,255,.45)';[{x:.12,y:.1,r:20},{x:.48,y:.06,r:24},{x:.76,y:.11,r:16}].forEach(cl=>{Mgx.beginPath();Mgx.arc(cl.x*MW,cl.y*MH,cl.r,0,Math.PI*2);Mgx.fill();Mgx.beginPath();Mgx.arc(cl.x*MW+cl.r*.65,cl.y*MH-cl.r*.2,cl.r*.45,0,Math.PI*2);Mgx.fill()});
+  // Ground
+  const gnd=Mgx.createLinearGradient(0,skyY,0,MH);gnd.addColorStop(0,'#92400e');gnd.addColorStop(.2,'#78350f');gnd.addColorStop(1,'#451a03');Mgx.fillStyle=gnd;Mgx.fillRect(0,skyY,MW,MH-skyY);Mgx.fillStyle='#a16207';Mgx.fillRect(0,skyY-1,MW,4);Mgx.fillStyle='#ca8a04';Mgx.fillRect(0,skyY-1,MW,2);
+  for(let i=0;i<35;i++){Mgx.fillStyle=`rgba(${40+Math.random()*30},${15+Math.random()*12},${4+Math.random()*8},.15)`;Mgx.beginPath();Mgx.arc((i*113+31)%MW,skyY+2+((i*53)%(MH-skyY-5)),2+((i*41)%5),0,Math.PI*2);Mgx.fill()}
+  // Gold ores scattered on ground
+  if(active){for(let j=0;j<6;j++){const ox=(.15+j*.14)*MW+Math.sin(t*2+j)*8,oy=skyY+6+Math.random()*18,rr=8+Math.random()*10;const gd=Mgx.createRadialGradient(ox-rr*.1,oy-rr*.2,rr*.05,ox,oy,rr);gd.addColorStop(0,'#fef3c7');gd.addColorStop(.4,'#fbbf24');gd.addColorStop(1,'#78350f');Mgx.fillStyle=gd;Mgx.beginPath();Mgx.arc(ox,oy,rr,0,Math.PI*2);Mgx.fill()}}
+  // Big ore being mined
+  if(active){const rx=cx+80,ry=skyY-5,rr=32+Math.sin(t*6)*3;const gd=Mgx.createRadialGradient(rx-rr*.15,ry-rr*.25,rr*.08,rx,ry,rr);gd.addColorStop(0,'#fef3c7');gd.addColorStop(.35,'#fbbf24');gd.addColorStop(1,'#78350f');Mgx.fillStyle=gd;Mgx.beginPath();Mgx.arc(rx,ry,rr,0,Math.PI*2);Mgx.fill();Mgx.fillStyle='rgba(255,255,255,.3)';Mgx.beginPath();Mgx.arc(rx-rr*.18,ry-rr*.22,rr*.2,0,Math.PI*2);Mgx.fill();
+    // Pickaxe on ore
+    Mgx.save();Mgx.translate(rx-30,ry-8);Mgx.rotate(-.3+Math.sin(t*6)*.4);Mgx.strokeStyle='#8b6914';Mgx.lineWidth=3;Mgx.beginPath();Mgx.moveTo(0,0);Mgx.lineTo(0,30);Mgx.stroke();Mgx.fillStyle='#6b7280';Mgx.beginPath();Mgx.moveTo(-10,24);Mgx.lineTo(10,24);Mgx.lineTo(2,34);Mgx.lineTo(-10,24);Mgx.fill();Mgx.restore();
+    for(let i=0;i<tier*2+2;i++){const a=Math.random()*Math.PI*2,d=rr+Math.random()*12;Mgx.fillStyle=`rgba(251,191,36,${.25+Math.random()*.4})`;Mgx.beginPath();Mgx.arc(rx+Math.cos(a)*d,ry+Math.sin(a)*d,1+Math.random()*2.5,0,Math.PI*2);Mgx.fill()}}
+  // Miner character
+  const mx=cx-55,my=skyY-85;
+  Mgx.fillStyle='rgba(0,0,0,.12)';Mgx.beginPath();Mgx.ellipse(cx-35,skyY+6,18,4,0,0,Math.PI*2);Mgx.fill();
+  const bodyColor=active?(tier>=4?'#7c3aed':tier>=3?'#22c55e':tier>=2?'#2563eb':'#d97706'):'#9ca3af';
+  Mgx.fillStyle=bodyColor;Mgx.fillRect(mx-1,my+32,22,26);Mgx.fillStyle='#1a0a02';Mgx.fillRect(mx-2,my+48,24,4);Mgx.fillStyle='#f5d0a9';Mgx.beginPath();Mgx.arc(mx+10,my+18,13,14,0,0,Math.PI*2);Mgx.fill();
+  Mgx.fillStyle='#4a3728';Mgx.beginPath();Mgx.arc(mx+10,my+10,14,Math.PI,Math.PI*2);Mgx.fill();Mgx.fillRect(mx-3,my+4,26,8);
+  Mgx.fillStyle='#fbbf24';Mgx.beginPath();Mgx.ellipse(mx+10,my+4,15,5,0,Math.PI,0);Mgx.fill();Mgx.fillStyle='#d97706';Mgx.fillRect(mx-5,my+0,30,4);
+  Mgx.fillStyle=bodyColor;Mgx.fillRect(mx-9,my+34,7,18);Mgx.fillRect(mx+21,my+34,7,18);
+  Mgx.fillStyle='#4a3728';Mgx.fillRect(mx-3,my+54,8,14);Mgx.fillRect(mx+14,my+54,8,14);Mgx.fillStyle='#2a1a0a';Mgx.fillRect(mx-5,my+64,11,5);Mgx.fillRect(mx+12,my+64,11,5);
+  if(active&&!document.getElementById('minerPg').classList.contains('on')){}// eyes
+  if(active){Mgx.fillStyle='#1a0a02';Mgx.beginPath();Mgx.arc(mx+5,my+15,2.5,3,0,Math.PI*2);Mgx.fill();Mgx.beginPath();Mgx.arc(mx+15,my+15,2.5,3,0,Math.PI*2);Mgx.fill();Mgx.fillStyle='#fff';Mgx.beginPath();Mgx.arc(mx+4,my+14,1,0,Math.PI*2);Mgx.fill();Mgx.beginPath();Mgx.arc(mx+14,my+14,1,0,Math.PI*2);Mgx.fill();Mgx.strokeStyle='#1a0a02';Mgx.lineWidth=1.5;Mgx.beginPath();Mgx.arc(mx+10,my+21,4,0,Math.PI);Mgx.stroke()}else{Mgx.strokeStyle='#1a0a02';Mgx.lineWidth=1.5;Mgx.beginPath();Mgx.moveTo(mx+3,my+15);Mgx.lineTo(mx+8,my+15);Mgx.stroke();Mgx.beginPath();Mgx.moveTo(mx+13,my+15);Mgx.lineTo(mx+18,my+15);Mgx.stroke()}
+  // Rate
+  Mgx.fillStyle='rgba(0,0,0,.5)';Mgx.fillRect(0,skyY+30,MW,30);Mgx.fillStyle='#fff';Mgx.font='bold 15px sans-serif';Mgx.textAlign='center';
+  if(active){Mgx.fillText('⚡ +'+Math.floor(mDefs[tier].rate*3600)+' gold/hr  |  Tap for '+ (2+Math.floor(tier/2))+'x BOOST',cx,skyY+50)}else{Mgx.fillText('Buy a miner to start!',cx,skyY+50)}
+  document.getElementById('mG').textContent=S.gold.toLocaleString();document.getElementById('mR').textContent=active?mDefs[tier].rate.toFixed(6):'0';minerAF=requestAnimationFrame(dM)}
+
+document.getElementById('btnMine').addEventListener('click',()=>{document.getElementById('minerPg').classList.add('on');setTimeout(()=>{mRs();rMC();if(minerAF)cancelAnimationFrame(minerAF);minerAF=requestAnimationFrame(dM)},200)});
+document.getElementById('minerBack').addEventListener('click',()=>{document.getElementById('minerPg').classList.remove('on');if(minerAF)cancelAnimationFrame(minerAF);upd()});
+document.getElementById('minerCd').addEventListener('click',e=>{const card=e.target.closest('.mc');if(!card)return;const i=parseInt(card.dataset.mi),m=mDefs[i],now=Date.now()/1000;if(i===0){if(S.minerExp>now){toast('Already active','n');return}S.activeMiner=0;S.minerExp=now+86400;toast('🆓 Free miner activated!','r');rMC();upd();return}if(S.activeMiner===i+1&&S.minerExp>now){toast('⏳ '+Math.ceil((S.minerExp-now)/3600)+'h remaining','n');return}popup(m.n+' '+m.t,'<div style="text-align:center;padding:8px"><div style="font-size:40px">'+m.i+'</div><div style="font-weight:800;font-size:15px;margin:6px 0">'+m.n+' '+m.t+'</div><div style="color:var(--dim);font-size:12px">'+m.d+'</div><div style="font-size:22px;font-weight:900;color:#fbbf24;margin:8px 0">'+m.usd+'</div><div style="font-size:9px;color:var(--dim);margin-bottom:10px">Send USDT · DM @your_bot</div><div class="buy-btn" style="width:100%;background:#22c55e;color:#000;border:none;font-weight:800;padding:12px;font-size:14px;display:block" id="demoB'+i+'">🔄 DEMO Activate</div></div>',()=>{document.getElementById('demoB'+i).onclick=()=>{S.activeMiner=i+1;S.minerExp=Date.now()/1000+86400;toast('⛏ '+m.n+' 24h!','r');document.getElementById('ap')?.remove();rMC();upd()}})});
+document.getElementById('minerCv').addEventListener('click',e=>{const now=Date.now()/1000;if(!(S.activeMiner>0&&S.minerExp>now)){toast('Buy a miner first!','n');return}if(boostEnd>now){toast('⚡ Already boosted! '+(boostMult+'x').slice(0,3)+' for '+Math.ceil(boostEnd-now)+'s','n');return}boostMult=2+Math.floor(S.activeMiner/2);boostEnd=now+15;toast('⚡ '+boostMult+'x SPEED for 15s!','r');if(shareCD<Date.now()){shareCD=Date.now()+60000;setTimeout(()=>{S.free++;toast('📤 Share boost! +1🆓','r');upd()},1200)}const r=document.getElementById('minerCv').getBoundingClientRect(),fx=e.clientX-r.left,fy=e.clientY-r.top;const fn=document.createElement('div');fn.style.cssText='position:absolute;left:'+(fx-20)+'px;top:'+(fy-10)+'px;color:#22d3ee;font-weight:900;font-size:20px;pointer-events:none;z-index:70;text-shadow:0 0 10px rgba(34,211,238,.8);animation:fl2 .9s ease-out forwards';fn.textContent=boostMult+'x BOOST!';document.getElementById('minerCv').appendChild(fn);setTimeout(()=>fn.remove(),900);for(let i=0;i<8;i++){const p=document.createElement('div');p.style.cssText='position:absolute;left:'+fx+'px;top:'+fy+'px;width:5px;height:5px;background:#22d3ee;border-radius:50%;pointer-events:none;z-index:69;animation:fp'+((i%3)+1)+' .6s ease-out forwards';p.style.setProperty('--dx',(Math.random()-.5)*40+'px');p.style.setProperty('--dy',(Math.random()-.5)*30-10+'px');document.getElementById('minerCv').appendChild(p);setTimeout(()=>p.remove(),600)}});
+const ms2=document.createElement('style');ms2.textContent='@keyframes fl2{0%{opacity:1;transform:translateY(0) scale(.8)}100%{opacity:0;transform:translateY(-70px) scale(1.3)}}@keyframes fp1{0%{opacity:1;transform:translate(0,0)}100%{opacity:0;transform:translate(var(--dx),var(--dy))}}@keyframes fp2{0%{opacity:1;transform:translate(0,0) scale(1.5)}100%{opacity:0;transform:translate(calc(var(--dx)*.7),calc(var(--dy)*1.2)) scale(0)}}@keyframes fp3{0%{opacity:1;transform:translate(0,0)}100%{opacity:0;transform:translate(calc(var(--dx)*1.3),calc(var(--dy)*.6)) scale(.3)}}';document.head.appendChild(ms2);
+setInterval(()=>{const now=Date.now()/1000;let rate=3/86400;if(S.activeMiner>0&&S.minerExp>now)rate+=mDefs[S.activeMiner].rate;if(S.minerExp<=now&&S.activeMiner>0)S.activeMiner=0;if(now<boostEnd)rate*=boostMult;else boostMult=1;S.gold+=rate;upd()},1000);
+upd();draw();startCD();
+</script>
+</body>
+</html>
