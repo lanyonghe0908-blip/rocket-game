@@ -191,22 +191,39 @@ function draw(){
       }
     }
 
-    // ── AIRPLANE ──
-    gx.save();gx.translate(rocketX,rocketY);gx.scale(scale,scale);gx.rotate(-angle);
+    // ── AIRPLANE (with banking, speed lines, dynamic flame) ──
+    const bankAngle=Math.sin(t*2.5)*.25; // gentle banking
+    const flameSize=1+progress*2; // flame grows as speed increases
+    gx.save();gx.translate(rocketX,rocketY);gx.scale(scale,scale);gx.rotate(-angle+bankAngle);
 
-    // Jet exhaust trail
-    for(let i=0;i<8;i++){
-      gx.fillStyle=`rgba(180,200,220,${.06-i*.006})`;
-      gx.beginPath();gx.arc((Math.random()-.5)*10,14+i*6,3+i*.5,0,Math.PI*2);gx.fill();
+    // ── SPEED LINES (at higher multipliers) ──
+    if(progress>.3){
+      for(let i=0;i<4;i++){
+        const sl=10+Math.random()*25;
+        gx.strokeStyle=`rgba(255,255,255,${.08+progress*.1})`;
+        gx.lineWidth=1;
+        gx.beginPath();gx.moveTo((Math.random()-.5)*40,-15-sl);gx.lineTo((Math.random()-.5)*20,-15-sl-8);gx.stroke();
+      }
     }
 
-    // Jet flame
+    // ── JET FLAME (bigger as multiplier increases) ──
     gx.fillStyle='#f97316';
-    gx.beginPath();gx.moveTo(-6,14);gx.quadraticCurveTo(-3,26+Math.random()*6,0,34+Math.random()*10);gx.quadraticCurveTo(3,26+Math.random()*6,6,14);gx.fill();
+    gx.beginPath();gx.moveTo(-6*flameSize,14);gx.quadraticCurveTo(-3,26+Math.random()*6,0,34*flameSize+Math.random()*10);gx.quadraticCurveTo(3,26+Math.random()*6,6*flameSize,14);gx.fill();
     gx.fillStyle='#fbbf24';
-    gx.beginPath();gx.moveTo(-4,12);gx.quadraticCurveTo(-2,20+Math.random()*4,0,26+Math.random()*6);gx.quadraticCurveTo(2,20+Math.random()*4,4,12);gx.fill();
+    gx.beginPath();gx.moveTo(-4,12);gx.quadraticCurveTo(-2,20+Math.random()*4,0,26*flameSize+Math.random()*6);gx.quadraticCurveTo(2,20+Math.random()*4,4,12);gx.fill();
     gx.fillStyle='#fef3c7';
-    gx.beginPath();gx.moveTo(-3,10);gx.quadraticCurveTo(-1,15+Math.random()*3,0,18+Math.random()*4);gx.quadraticCurveTo(1,15+Math.random()*3,3,10);gx.fill();
+    gx.beginPath();gx.moveTo(-3,10);gx.quadraticCurveTo(-1,15+Math.random()*3,0,18*flameSize+Math.random()*4);gx.quadraticCurveTo(1,15+Math.random()*3,3,10);gx.fill();
+    // Flame spark particles
+    for(let i=0;i<6;i++){
+      gx.fillStyle=`rgba(251,191,36,${.2+Math.random()*.4})`;
+      gx.beginPath();gx.arc((Math.random()-.5)*12,18+Math.random()*22*flameSize,1+Math.random()*2,0,Math.PI*2);gx.fill();
+    }
+
+    // ── CONTRAIL (smoke trail) ──
+    for(let i=0;i<4;i++){
+      gx.fillStyle=`rgba(200,210,220,${.04-i*.008})`;
+      gx.beginPath();gx.arc((Math.random()-.5)*12,16+i*8,3+i,0,Math.PI*2);gx.fill();
+    }
 
     // Fuselage (body)
     const fg=gx.createLinearGradient(0,-18,0,10);
@@ -234,6 +251,10 @@ function draw(){
     gx.fillStyle='#60a5fa';
     [{y:-10},{y:-5},{y:0}].forEach(w=>{gx.beginPath();gx.arc(0,w.y,2,0,Math.PI*2);gx.fill()});
 
+    // ── ENGINE GLOW ──
+    gx.fillStyle=`rgba(0,229,255,${.08+progress*.08})`;
+    gx.beginPath();gx.arc(0,12,4+progress*3,0,Math.PI*2);gx.fill();
+
     gx.restore();
   }
 
@@ -249,7 +270,7 @@ function draw(){
     const ery=esy+edy*et+eny*ewave;
     const ex=Math.max(15,Math.min(W-15,erx));
     const ey=Math.max(5,Math.min(H-5,ery));
-    const escale=1.0-et*.65;
+    const escale=1.0-et*.3;
 
     gx.fillStyle='rgba(255,61,79,.08)';gx.fillRect(0,0,W,H);
     [20,32,48,66].forEach((r,i)=>{
