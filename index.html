@@ -144,6 +144,20 @@ function draw(){
   gx.strokeStyle='rgba(0,229,255,.03)';for(let i=1;i<40;i++){gx.beginPath();gx.moveTo(0,i*H*.025);gx.lineTo(W,i*H*.025);gx.stroke()}
   gx.strokeStyle='rgba(0,229,255,.05)';for(let i=1;i<12;i++){gx.beginPath();gx.moveTo(i*W*.08,0);gx.lineTo(i*W*.08,H*.75);gx.stroke()}
   gx.strokeStyle='rgba(0,229,255,.08)';gx.lineWidth=1;gx.beginPath();gx.moveTo(cx,0);gx.lineTo(cx,H*.75);gx.stroke();
+
+  // ── HELIPAD (always visible) ──
+  const padX=W*.78,padY=H*.82;
+  gx.strokeStyle='rgba(255,255,255,.1)';gx.lineWidth=2;
+  gx.beginPath();gx.arc(padX,padY,32,0,Math.PI*2);gx.stroke();
+  gx.strokeStyle='rgba(255,255,255,.06)';gx.lineWidth=1;
+  gx.beginPath();gx.arc(padX,padY,38,0,Math.PI*2);gx.stroke();
+  gx.fillStyle='rgba(255,255,255,.15)';gx.font='bold 22px sans-serif';gx.textAlign='center';gx.textBaseline='middle';
+  gx.fillText('H',padX,padY);
+  gx.strokeStyle='rgba(255,255,255,.06)';gx.setLineDash([4,8]);gx.lineWidth=1;
+  gx.beginPath();gx.moveTo(padX-24,padY-24);gx.lineTo(padX+24,padY+24);gx.stroke();
+  gx.beginPath();gx.moveTo(padX+24,padY-24);gx.lineTo(padX-24,padY+24);gx.stroke();
+  gx.setLineDash([]);
+
   // Corner accents
   [{x:0,y:0},{x:W-1,y:0},{x:0,y:H-1},{x:W-1,y:H-1}].forEach(cr=>{gx.strokeStyle='rgba(0,229,255,.08)';gx.lineWidth=1;gx.strokeRect(cr.x,cr.y,1,1)});
 
@@ -179,21 +193,6 @@ function draw(){
     const rocketX=Math.max(15,Math.min(W-15,rx));
     const rocketY=Math.max(5,Math.min(H-5,ry));
     const scale=1.0-progress*.2; // keep plane visible
-
-    // ── HELIPAD (landing pad at start position) ──
-    const padX=W*.78,padY=H*.82;
-    gx.strokeStyle='rgba(255,255,255,.1)';gx.lineWidth=2;
-    gx.beginPath();gx.arc(padX,padY,32,0,Math.PI*2);gx.stroke();
-    gx.strokeStyle='rgba(255,255,255,.06)';gx.lineWidth=1;
-    gx.beginPath();gx.arc(padX,padY,38,0,Math.PI*2);gx.stroke();
-    // H letter
-    gx.fillStyle='rgba(255,255,255,.15)';gx.font='bold 22px sans-serif';gx.textAlign='center';gx.textBaseline='middle';
-    gx.fillText('H',padX,padY);
-    // Dashed cross
-    gx.strokeStyle='rgba(255,255,255,.06)';gx.setLineDash([4,8]);gx.lineWidth=1;
-    gx.beginPath();gx.moveTo(padX-24,padY-24);gx.lineTo(padX+24,padY+24);gx.stroke();
-    gx.beginPath();gx.moveTo(padX+24,padY-24);gx.lineTo(padX-24,padY+24);gx.stroke();
-    gx.setLineDash([]);
 
     // ── WAVE TRAIL ──
     if(phase==='fly'){
