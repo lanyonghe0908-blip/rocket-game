@@ -146,7 +146,7 @@ function draw(){
   gx.strokeStyle='rgba(0,229,255,.08)';gx.lineWidth=1;gx.beginPath();gx.moveTo(cx,0);gx.lineTo(cx,H*.75);gx.stroke();
 
   // ── HELIPAD (always visible) ──
-  const padX=W*.5,padY=H*.5;
+  const padX=W*.5,padY=H*.85;
   gx.strokeStyle='rgba(255,255,255,.1)';gx.lineWidth=2;
   gx.beginPath();gx.arc(padX,padY,36,0,Math.PI*2);gx.stroke();
   gx.strokeStyle='rgba(255,255,255,.06)';gx.lineWidth=1;
@@ -176,12 +176,14 @@ function draw(){
     gx.fillText('1.00×',cx,multY);
   }
 
-  // Airplane flight (phase==='fly' only)
+  // Airplane flight (phase==='fly' only) - random left/right
   if(phase==='fly'){
-    const progress=Math.min(1,(dm-1)/22); // SLOWER: 1x→23x range
-    const waveFreq=3.5,waveAmp=W*.08;
-    const sx=W*.88,sy=H*.88; // start from helipad
-    const ex=W*.18,ey=H*.08; // end top-left
+    const progress=Math.min(1,(dm-1)/22);
+    const waveFreq=3.5,waveAmp=W*.06;
+    const sx=W*.5,sy=H*.85; // start: bottom center helipad
+    // Random direction per round - seed from crashPoint
+    const goLeft=((cp*100)|0)%2===0;
+    const ex=goLeft?W*.12:W*.88,ey=H*.08; // end: top-left or top-right
     const t=progress;
     const dx=ex-sx,dy=ey-sy;
     const dist=Math.sqrt(dx*dx+dy*dy);
@@ -189,7 +191,7 @@ function draw(){
     const wave=Math.sin(t*Math.PI*waveFreq)*waveAmp*(1-t);
     const rx=sx+dx*t+nx*wave;
     const ry=sy+dy*t+ny*wave;
-    const angle=Math.PI/4;
+    const angle=goLeft?Math.PI/3.5:Math.PI/4.5;
     const rocketX=Math.max(15,Math.min(W-15,rx));
     const rocketY=Math.max(5,Math.min(H-5,ry));
     const scale=1.0-progress*.2; // keep plane visible
@@ -276,7 +278,8 @@ function draw(){
   // ── EXPLOSION (phase==='end', completely separate from rocket) ──
   if(phase==='end'){
     const eProgress=Math.min(1,(cp-1)/14);
-    const esx=W*.88,esy=H*.88,eex=W*.18,eey=H*.08;
+    const eGoLeft=((cp*100)|0)%2===0;
+    const esx=W*.5,esy=H*.85,eex=eGoLeft?W*.12:W*.88,eey=H*.08;
     const edx=eex-esx,edy=eey-esy,edist=Math.sqrt(edx*edx+edy*edy);
     const enx=-edy/edist,eny=edx/edist;
     const ewaveFreq=3.5,ewaveAmp=W*.08,et=Math.min(eProgress,.99);
