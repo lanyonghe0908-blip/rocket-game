@@ -163,7 +163,7 @@ function draw(){
 
   const dm=phase==='fly'?mult:(phase==='end'?cp:1);
   // Countdown
-  if(phase==='wait'&&pT>0){const sec=Math.ceil(pT);gx.strokeStyle='rgba(0,229,255,.15)';gx.lineWidth=3;gx.beginPath();gx.arc(cx,H*.42,44,0,Math.PI*2);gx.stroke();gx.shadowColor='rgba(0,229,255,.2)';gx.shadowBlur=12;gx.fillStyle='#fff';gx.font='bold 52px sans-serif';gx.textAlign='center';gx.fillText(sec,cx,H*.42+16);gx.shadowBlur=0}
+  if(phase==='wait'&&pT>0){const sec=Math.ceil(pT);const cy=H*.42;gx.strokeStyle='rgba(0,229,255,.15)';gx.lineWidth=3;gx.beginPath();gx.arc(cx,cy,44,0,Math.PI*2);gx.stroke();gx.shadowColor='rgba(0,229,255,.2)';gx.shadowBlur=12;gx.fillStyle='#fff';gx.font='bold 52px sans-serif';gx.textAlign='center';gx.textBaseline='middle';gx.fillText(sec,cx,cy);gx.shadowBlur=0;gx.textBaseline='alphabetic'}
   // Multiplier (only during flight)
   const multY=H*.48;
   if(phase==='fly'){
