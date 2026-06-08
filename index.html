@@ -309,7 +309,7 @@ function draw(){
     gx.fillText('💥 '+cp.toFixed(2)+'×',ex,ey-44);
     gx.shadowBlur=0;
   }else if(phase==='wait'&&pT<=0){gx.font='36px sans-serif';gx.textAlign='center';gx.fillText('🚀',cx,H*.55)}
-  pts=pts.filter(p=>p.life>0);pts.forEach(p=>{p.life-=.014;p.y-=p.vy;p.vy+=.05;p.x+=p.vx;gx.globalAlpha=p.life;gx.fillStyle=p.c;gx.beginPath();gx.arc(p.x,p.y,p.s,0,Math.PI*2);gx.fill()});gx.globalAlpha=1;
+  if(phase==="wait"){const px=W*.5,py=H*.85;gx.save();gx.translate(px,py);gx.fillStyle="#f1f5f9";gx.beginPath();gx.ellipse(0,-2,6,20,0,0,Math.PI*2);gx.fill();gx.fillStyle="#ff3d4f";gx.beginPath();gx.moveTo(0,-24);gx.quadraticCurveTo(5,-14,6,-20);gx.quadraticCurveTo(-6,-20,-5,-14);gx.fill();gx.fillStyle="#94a3b8";gx.beginPath();gx.moveTo(-3,-5);gx.lineTo(-18,-2);gx.lineTo(-18,4);gx.lineTo(-3,2);gx.fill();gx.beginPath();gx.moveTo(3,-5);gx.lineTo(18,-2);gx.lineTo(18,4);gx.lineTo(3,2);gx.fill();gx.fillStyle="#ff3d4f";gx.fillRect(-18,-2,3,6);gx.fillRect(15,-2,3,6);gx.fillStyle="#ff3d4f";gx.beginPath();gx.moveTo(-3,10);gx.lineTo(-8,18);gx.lineTo(0,14);gx.fill();gx.beginPath();gx.moveTo(3,10);gx.lineTo(8,18);gx.lineTo(0,14);gx.fill();gx.fillStyle="#60a5fa";[{y:-10},{y:-5},{y:0}].forEach(w=>{gx.beginPath();gx.arc(0,w.y,2,0,Math.PI*2);gx.fill()});gx.restore()}
 }
 setInterval(()=>{if(phase==='fly')draw()},35);
 
