@@ -189,9 +189,13 @@ function draw(){
     const dist=Math.sqrt(dx*dx+dy*dy);
     const nx=-dy/dist,ny=dx/dist;
     const wave=Math.sin(t*Math.PI*waveFreq)*waveAmp*(1-t);
+    // Position
     const rx=sx+dx*t+nx*wave;
     const ry=sy+dy*t+ny*wave;
-    const angle=goLeft?Math.PI/3.5:Math.PI/4.5;
+    // Angle follows wave tangent
+    const waveDeriv=Math.cos(t*Math.PI*waveFreq)*waveAmp*Math.PI*waveFreq*(1-t)-Math.sin(t*Math.PI*waveFreq)*waveAmp;
+    const tdx=dx+nx*waveDeriv,tdy=dy+ny*waveDeriv;
+    const angle=Math.atan2(-tdy,tdx);
     const rocketX=Math.max(15,Math.min(W-15,rx));
     const rocketY=Math.max(5,Math.min(H-5,ry));
     const scale=1.0-progress*.2; // keep plane visible
